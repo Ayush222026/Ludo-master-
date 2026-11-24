@@ -50,7 +50,7 @@ body{background:repeating-linear-gradient(45deg,#ffffff0a 0 28px,#0000 28px 56px
 <div class=lg><div class=crown>👑</div><div><span class=lt style="color:#e53935;border-color:#e53935">R</span><span class=lt style="color:#43a047;border-color:#43a047">A</span><span class=lt style="color:#fbc02d;border-color:#fbc02d">N</span><span class=lt style="color:#1e88e5;border-color:#1e88e5">G</span></div><div class=sub>CHAAL</div></div>
 <div id=stage></div></div>
 <div id=game hidden><div id=bar></div><canvas id=cv></canvas><div id=msg></div>
-<button id=dice>⚀</button><div><button id=sp class=s hidden></button></div><div id=pk hidden></div>
+<button id=dice>⚀</button><div><button id=sp class=s hidden></button><button id=bl class=s hidden></button></div><div id=pk hidden></div>
 <div><button id=mn>☰ Menu</button><button id=sfxb>🔊</button><button id=mub>🎵</button></div></div></div>
 <script>
 const $=s=>document.querySelector(s),COL=['#e53935','#43a047','#fdd835','#1e88e5'],NM=['Red','Green','Yellow','Blue'],AV=['🦁','🐯','🦊','🐼'],FACE='⚀⚁⚂⚃⚄⚅'.split('');
@@ -76,19 +76,24 @@ ${cpu?`<b>Computer level</b><div class=row style="justify-content:center">${['ea
 <button class="gold big" data-go=names>NEXT ➜</button><button class="back big" data-go=home>⬅ Back</button>`;
 else if(step=='names')m.innerHTML=`<h2>Player names</h2>`+ACT().map(c=>seat(c)=='H'?`<div class=row style="justify-content:center;align-items:center"><button data-a=${c} style="border-color:${COL[c]}">${AV[c]}</button><input data-p=${c} value="${NM[c]}" maxlength=10></div>`:`<div class=row style="justify-content:center;align-items:center"><button disabled style="border-color:${COL[c]}">${AV[c]}</button><input disabled value="Computer (${cfg.d})"></div>`).join('')+`<p style="opacity:.7;font-size:13px">Tap the avatar to change it</p><button class="gold big" data-go=ready>NEXT ➜</button><button class="back big" data-go=count>⬅ Back</button>`;
 else if(step=='ready')m.innerHTML=`<h2>Ready?</h2><div class=card>${cfg.mode=='t'?'⚡ Tricky':'🎲 Classic'} · ${cpu?'vs Computer':'Friends'}<hr>`+ACT().map(c=>`<span style="color:${COL[c]}">●</span> ${AV[c]} ${seat(c)=='H'?NM[c]:'Computer ('+cfg.d+')'}`).join('<br>')+`</div><button id=go class="gold big">▶ START GAME</button><button class="back big" data-go=names>⬅ Back</button>`;
-else m.innerHTML=`<h2>📊 Stats</h2><div class=card><b>⚡ Special dice</b><br><small>Only in Tricky mode. Every game starts at 0, no limit, and they reset when the game ends.</small><hr>Games finished: ${ST.p} · Captures: ${ST.cap}<br>`+ST.h.slice(-8).reverse().join('<br>')+`</div><button class="back big" data-go=home>⬅ Back</button>`}
+else m.innerHTML=`<h2>📊 Stats</h2><div class=card><b>⚡ Special dice &amp; 🚧 roadblocks</b><br><small>Only in Tricky mode. Pick them up from the 🎲 / 🚧 tiles on the path (a tile jumps elsewhere after pickup). Start at 0 each game, no limit, reset at game end.</small><hr>Games finished: ${ST.p} · Captures: ${ST.cap}<br>`+ST.h.slice(-8).reverse().join('<br>')+`</div><button class="back big" data-go=home>⬅ Back</button>`}
 $('#menu').onclick=e=>{const b=e.target.closest('button');if(!b)return;const d=b.dataset;if(d.m)cfg.mode=d.m;if(d.n)cfg.n=+d.n;if(d.d)cfg.d=d.d;
 if(d.a!=null){AV[d.a]=AVL[(AVL.indexOf(AV[d.a])+1)%AVL.length];savePR()}
 if(d.go=='cpu'||d.go=='fr'){cfg.vs=d.go;step='count'}else if(d.go=='resume'){G=ld('lk_save',null);if(G)return begin()}else if(d.go)step=d.go;
 if(b.id=='go')return startGame();mr()};
 $('#menu').oninput=e=>{const c=e.target.dataset.p;if(c!=null){NM[c]=e.target.value.trim()||DEF[c];savePR()}};
-function startGame(){G={mode:cfg.mode,turn:0,pl:ACT().map(c=>{const h=seat(c)=='H';return{c,ai:h?0:cfg.d,t:[-1,-1,-1,-1],sh:[0,0,0,0],inv:0}})};begin()}
+function startGame(){G={mode:cfg.mode,turn:0,bk:[],pk:cfg.mode=='t'?mkPk():[],pl:ACT().map(c=>{const h=seat(c)=='H';return{c,ai:h?0:cfg.d,t:[-1,-1,-1,-1],sh:[0,0,0,0],inv:0,bl:0}})};begin()}
 function show(g){$('#menu').hidden=g;$('#game').hidden=!g;if(g)resize();else{step='home';mr()}}
 function begin(){show(true);music=true;turn()}
 $('#mn').onclick=()=>{busy=true;show(false)};
 $('#sfxb').onclick=e=>{sfx=!sfx;e.target.textContent=sfx?'🔊':'🔇'};$('#mub').onclick=e=>{music=!music;e.target.style.opacity=music?1:.4};
 const lv=p=>({easy:1,medium:2,hard:3})[p.ai],cur=()=>G.pl[G.turn],msg=t=>$('#msg').textContent=t;
-const legal=(p,r)=>[0,1,2,3].filter(i=>p.t[i]<0?r==6:p.t[i]+r<=56);
+const blk=(p,f,to)=>{if(!G.bk||!G.bk.length)return false;for(let k=f<0?0:f+1;k<=Math.min(to,50);k++){const a=abs(p,k);if(G.bk.some(b=>b.a==a&&b.o!=p.c))return true}return false};
+const legal=(p,r)=>[0,1,2,3].filter(i=>p.t[i]<0?r==6&&!blk(p,-1,0):p.t[i]+r<=56&&!blk(p,p.t[i],p.t[i]+r));
+function mkPk(){const pk=[];for(const t of 'ddddbb'){let a;do{a=rnd(52)}while(SAFE.has(a)||pk.some(x=>x.a==a));pk.push({a,t})}return pk}
+function relocate(k){let a;do{a=rnd(52)}while(SAFE.has(a)||a==k.a||G.pk.some(x=>x.a==a));k.a=a}
+function aiBlock(p){let best=null;for(const o of G.pl)if(o!==p)for(const q of o.t)if(q>=8&&q<=47&&(!best||q>best.q))best={o,q};
+if(!best)return;const a=abs(best.o,best.q+(lv(p)>2?1:1+rnd(3)));if(G.bk.some(b=>b.a==a))return;p.bl--;G.bk.push({a,o:p.c});msg(`🚧 ${NM[p.c]} placed a roadblock!`)}
 function gain(p,n){if(G.mode=='t')p.inv+=n}
 function use(p){p.inv--}
 const abs=(p,q)=>(START[p.c]+q)%52;
@@ -97,29 +102,26 @@ function score(p,i,r){const t=p.t[i],to=t<0?0:t+r,l=lv(p);let s=Math.random()*5+
 if(to<=50){const a=abs(p,to);if(!SAFE.has(a)){for(const o of G.pl)if(o!==p)for(const q of o.t)if(q>=0&&q<=50&&abs(o,q)==a)s+=100;if(l>2)s-=danger(p,a)*18}else if(l>2)s+=25;
 if(l>2&&t>=0&&t<=50&&!SAFE.has(abs(p,t)))s+=danger(p,abs(p,t))*22}else s+=20;return s}
 function pick(p,r,m){if(lv(p)==1)return m[rnd(m.length)];return m.reduce((b,i)=>score(p,i,r)>score(p,b,r)?i:b,m[0])}
-async function turn(){if(G.over)return;const p=cur();G.ph='roll';localStorage.lk_save=JSON.stringify(G);busy=false;ui();msg(`${AV[p.c]} ${NM[p.c]}'s turn`);
-if(p.ai){busy=true;ui();await sleep(800);if(lv(p)>1&&p.inv>0){let b=[0,0];for(let n=1;n<7;n++)for(const i of legal(p,n)){const s=score(p,i,n);if(s>b[0])b=[s,n]}if(b[0]>=(lv(p)>2?80:100)){use(p);return roll(b[1])}}roll()}}
-function ui(){const p=cur();$('#bar').innerHTML=G.pl.map((q,i)=>`<div class="pc${i==G.turn?' on':''}" style="border-color:${COL[q.c]}">${AV[q.c]}<small>${NM[q.c]}${q.ai?' 🤖':''}</small>🏠${q.t.filter(x=>x==56).length}${G.mode=='t'?' 🎲'+q.inv:''}</div>`).join('');
-$('#sp').hidden=!(!p.ai&&p.inv>0&&G.ph=='roll'&&!busy);$('#sp').textContent=`🎲 Use special dice ×${p.inv}`;$('#pk').hidden=true}
+async function turn(){if(G.over)return;G.bk=G.bk||[];G.pk=G.pk||[];const p=cur();G.ph='roll';localStorage.lk_save=JSON.stringify(G);busy=false;ui();msg(`${AV[p.c]} ${NM[p.c]}'s turn`);
+if(p.ai){busy=true;ui();await sleep(800);if(G.mode=='t'&&lv(p)>1&&(p.bl||0)>0)aiBlock(p);if(lv(p)>1&&p.inv>0){let b=[0,0];for(let n=1;n<7;n++)for(const i of legal(p,n)){const s=score(p,i,n);if(s>b[0])b=[s,n]}if(b[0]>=(lv(p)>2?80:100)){use(p);return roll(b[1])}}roll()}}
+function ui(){const p=cur();$('#bar').innerHTML=G.pl.map((q,i)=>`<div class="pc${i==G.turn?' on':''}" style="border-color:${COL[q.c]}">${AV[q.c]}<small>${NM[q.c]}${q.ai?' 🤖':''}</small>🏠${q.t.filter(x=>x==56).length}${G.mode=='t'?' 🎲'+q.inv+' 🚧'+(q.bl||0):''}</div>`).join('');
+$('#sp').hidden=!(!p.ai&&p.inv>0&&G.ph=='roll'&&!busy);$('#sp').textContent=`🎲 Use special dice ×${p.inv}`;$('#bl').hidden=!(G.mode=='t'&&!p.ai&&(p.bl||0)>0&&(G.ph=='roll'||G.ph=='place')&&!busy);$('#bl').textContent=G.ph=='place'?'✖ Cancel':`🚧 Place roadblock ×${p.bl}`;$('#pk').hidden=true}
+$('#bl').onclick=()=>{if(busy)return;if(G.ph=='roll'){G.ph='place';msg('🚧 Tap a cell on the path to place the roadblock');ui()}else if(G.ph=='place'){G.ph='roll';msg('Your turn');ui()}};
 $('#dice').onclick=()=>{if(!busy&&!cur().ai&&G.ph=='roll')roll()};
 $('#sp').onclick=()=>{$('#pk').hidden=!$('#pk').hidden};
 $('#pk').innerHTML=[1,2,3,4,5,6].map(n=>`<button data-n="${n}">${n}</button>`).join('');
 $('#pk').onclick=e=>{const n=+e.target.dataset.n;if(n&&!busy&&G.ph=='roll'&&cur().inv>0){use(cur());roll(n)}};
 async function roll(f){busy=true;const p=cur();ui();for(let k=0;k<8;k++){$('#dice').textContent=FACE[rnd(6)];beep(200+k*40,.05);await sleep(70)}
 const r=f||rnd(6)+1;G.roll=r;if(r==6){G.six=(G.six||0)+1;if(G.six>=3){G.six=0;$('#dice').textContent=FACE[5];msg('🚫 Three 6s in a row! Turn lost');await sleep(1200);return nxt()}}else G.six=0;$('#dice').textContent=FACE[r-1];const m=legal(p,r);
-if(!m.length){msg(`Rolled ${r} - no move`);await sleep(800);return nxt()}
+if(!m.length){msg(`Rolled ${r} - no move${(G.bk||[]).some(b=>b.o!=p.c)?' (🚧 roadblock)':''}`);await sleep(800);return nxt()}
 if(p.ai||m.length==1){await sleep(300);return move(p,p.ai?pick(p,r,m):m[0],r)}
 G.ph='pick';busy=false;msg(`Rolled ${r} - tap a glowing token`)}
-function nxt(){G.six=0;G.turn=(G.turn+1)%G.pl.length;turn()}
+function nxt(){G.six=0;G.turn=(G.turn+1)%G.pl.length;G.bk=(G.bk||[]).filter(b=>b.o!=G.pl[G.turn].c);turn()}
 async function move(p,i,r){busy=true;G.ph='x';const t=p.t,from=t[i],to=from<0?0:from+r;let ex=r==6,cap=0;
 if(from<0){t[i]=0;beep(500)}else for(let k=from+1;k<=to;k++){t[i]=k;beep(300+k*5,.05);await sleep(130)}
 if(to<=50){const a=abs(p,to);
 if(!SAFE.has(a))for(const o of G.pl)if(o!==p)o.t.forEach((q,j)=>{if(q>=0&&q<=50&&abs(o,q)==a){if(o.sh&&o.sh[j]){o.sh[j]=0;msg('🛡️ Shield saved a token!')}else{o.t[j]=-1;cap++}}});
-if(G.mode=='t'&&TRICK.includes(a)){const e=rnd(5);await sleep(300);beep(700,.3,'square');
-if(e==0){gain(p,2);msg('🎁 Gift tile! +2 special dice')}
-else if(e==1&&to+4<=50){t[i]=to+4;msg('⚡ Boost! +4 steps')}
-else if(e==2&&to>=3){t[i]=to-3;msg('🕳️ Trap! back 3 steps')}
-else if(e==3){ex=true;msg('🔁 Bonus move!')}else if(e==4){(p.sh=p.sh||[0,0,0,0])[i]=1;msg('🛡️ Shield! Safe from the next capture')}else msg('✨ Surprise tile - nothing happened')}}
+if(G.mode=='t'){const k=(G.pk||[]).find(x=>x.a==a);if(k){await sleep(250);beep(800,.25,'square');if(k.t=='d'){gain(p,1);msg('🎲 Special dice collected!')}else{p.bl=(p.bl||0)+1;msg('🚧 Roadblock collected!')}relocate(k)}}}
 if(cap){ex=true;ST.cap+=cap;gain(p,cap);beep(120,.4,'sawtooth');msg(`💥 Captured ${cap}!${G.mode=='t'?' +'+cap+' special dice':''}`)}
 if(to==56){ex=true;gain(p,1);beep(900,.3);msg(G.mode=='t'?'🏠 Token home! +1 special dice':'🏠 Token home!')}
 ui();await sleep(600);
@@ -131,7 +133,9 @@ if(q<=55){const c=HOME(p.c,q-51);return[c[0]+.5,c[1]+.5]}return[FIN[p.c][0]+(i-1
 const cv=$('#cv'),X=cv.getContext('2d');
 function resize(){const w=Math.min(innerWidth-20,480),d=devicePixelRatio||1;cv.style.width=cv.style.height=w+'px';cv.width=cv.height=Math.round(w*d)}
 addEventListener('resize',()=>{if(!$('#game').hidden)resize()});
-cv.onclick=e=>{if(!G||busy||G.ph!='pick')return;const b=cv.getBoundingClientRect(),x=(e.clientX-b.left)/b.width*15,y=(e.clientY-b.top)/b.height*15,p=cur();
+cv.onclick=e=>{if(!G||busy)return;const b=cv.getBoundingClientRect(),x=(e.clientX-b.left)/b.width*15,y=(e.clientY-b.top)/b.height*15,p=cur();
+if(G.ph=='place'){const i=P.findIndex(c=>c[0]==Math.floor(x)&&c[1]==Math.floor(y));if(i<0){msg('Tap a cell on the path');return}p.bl--;G.bk.push({a:i,o:p.c});G.ph='roll';ui();msg('🚧 Roadblock placed! Now roll the dice');beep(250,.2,'square');return}
+if(G.ph!='pick')return;
 for(const i of legal(p,G.roll)){const[a,c]=xy(p,i);if(Math.hypot(a-x,c-y)<.8){return move(p,i,G.roll)}}};
 function draw(){const s=cv.width/15;if(!G||$('#game').hidden)return;X.fillStyle='#fff8e1';X.fillRect(0,0,cv.width,cv.width);
 for(let c=0;c<4;c++){const[ox,oy]=YO[c];X.fillStyle=COL[c];X.fillRect(ox*s,oy*s,6*s,6*s);X.fillStyle='#fff8e1';X.fillRect((ox+1)*s,(oy+1)*s,4*s,4*s);
@@ -139,16 +143,9 @@ if(G.pl.some(q=>q.c==c))YS.forEach(([a,b])=>{X.fillStyle=COL[c]+'55';X.beginPath
 X.font=`${s*.6}px sans-serif`;X.textAlign='center';X.textBaseline='middle';
 P.forEach(([a,b],i)=>{X.fillStyle='#fff';X.fillRect(a*s,b*s,s,s);const c=START.indexOf(i);if(c>=0){X.fillStyle=COL[c];X.fillRect(a*s,b*s,s,s)}
 X.strokeStyle='#8886';X.strokeRect(a*s,b*s,s,s);if(SAFE.has(i)){X.fillStyle=c>=0?'#fff':'#999';X.fillText('★',(a+.5)*s,(b+.55)*s)}
-else if(G.mode=='t'&&TRICK.includes(i)){X.fillStyle='#8e24aa';X.fillText('?',(a+.5)*s,(b+.55)*s)}});
+else{const k=(G.pk||[]).find(x=>x.a==i);if(k){X.fillStyle='#f3e5f5';X.fillRect(a*s+1,b*s+1,s-2,s-2);X.fillStyle='#000';X.fillText(k.t=='d'?'🎲':'🚧',(a+.5)*s,(b+.55)*s)}}});
 for(let c=0;c<4;c++)for(let k=0;k<5;k++){const[a,b]=HOME(c,k);X.fillStyle=COL[c];X.fillRect(a*s,b*s,s,s);X.strokeStyle='#fff6';X.strokeRect(a*s,b*s,s,s)}
 [[[6,6],[6,9]],[[6,6],[9,6]],[[9,6],[9,9]],[[6,9],[9,9]]].forEach(([u,v],c)=>{X.fillStyle=COL[c];X.beginPath();X.moveTo(u[0]*s,u[1]*s);X.lineTo(v[0]*s,v[1]*s);X.lineTo(7.5*s,7.5*s);X.fill()});
+(G.bk||[]).forEach(k=>{const[a,b]=P[k.a];X.strokeStyle=COL[k.o];X.lineWidth=s*.12;X.strokeRect(a*s+2,b*s+2,s-4,s-4);X.fillStyle='#000';X.fillText('🚧',(a+.5)*s,(b+.55)*s)});
 const mv=G.ph=='pick'?legal(cur(),G.roll):[],pulse=.5+.5*Math.sin(Date.now()/150);
-G.pl.forEach(p=>p.t.forEach((q,i)=>{const[a,b]=xy(p,i);X.fillStyle='#0004';X.beginPath();X.arc(a*s,(b+.08)*s,.34*s,0,7);X.fill();
-X.fillStyle=COL[p.c];X.strokeStyle='#fff';X.lineWidth=s*.07;X.beginPath();X.arc(a*s,b*s,.33*s,0,7);X.fill();X.stroke();
-X.fillStyle='#fff7';X.beginPath();X.arc((a-.1)*s,(b-.1)*s,.1*s,0,7);X.fill();
-if(p.sh&&p.sh[i]){X.strokeStyle='#80d8ff';X.lineWidth=s*.08;X.beginPath();X.arc(a*s,b*s,.42*s,0,7);X.stroke()}
-if(p===cur()&&mv.includes(i)){X.strokeStyle=`rgba(255,255,255,${.4+pulse*.6})`;X.lineWidth=s*.1;X.beginPath();X.arc(a*s,b*s,(.45+pulse*.1)*s,0,7);X.stroke()}}))}
-(function loop(){draw();requestAnimationFrame(loop)})();
-if('serviceWorker' in navigator)navigator.serviceWorker.register('sw.js').catch(()=>{});
-mr();
-</script></body></html>
+G.pl.forEach(p=>p.t.forEach((q,i)=>{const[a,b]=xy(p,i);X.fillStyle='#0004';X.beginPath();X.arc(a*s,(b+.08)*s,.34*s,0

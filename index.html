@@ -13,10 +13,12 @@ canvas{border-radius:14px;box-shadow:0 6px 24px #0008;touch-action:manipulation}
 .pc small{display:block;font-size:10px}
 #dice{font-size:64px;line-height:1;background:#fff;color:#222;border-radius:18px;width:92px;height:92px;padding:0}
 #msg{min-height:24px;font-weight:700}#pk button{width:46px;padding:10px 0}
+input{font:inherit;padding:9px;border-radius:10px;border:0;width:150px;margin:3px}
 </style></head><body><div id=app>
 <div id=menu><h1>Rang Chaal</h1><p>Offline Ludo · Classic &amp; Tricky</p>
 <div class=card><b>Mode</b><div class=row id=mm></div><b>Players</b><div class=row id=pc></div><b>Seats (tap to change)</b><div class=row id=seats></div>
 <div class=row><button id=pf>👥 Friends</button><button id=pcpu>🤖 vs Computer</button></div></div>
+<button id=pfb class=big>👤 Player Profiles</button><div id=prof class=card hidden></div>
 <button id=go class=big>▶ Play</button><button id=res class=big>⏪ Resume saved game</button><button id=inf class=big>🎒 Inventory &amp; Stats</button><div id=info class=card hidden></div></div>
 <div id=game hidden><div id=bar></div><canvas id=cv></canvas><div id=msg></div>
 <button id=dice>⚀</button><div><button id=sp class=s hidden></button></div><div id=pk hidden></div>
@@ -29,6 +31,12 @@ const HOME=(c,k)=>[[1+k,7],[7,1+k],[13-k,7],[7,13-k]][c],FIN=[[6.6,7.5],[7.5,6.6
 const ld=(k,d)=>{try{return JSON.parse(localStorage[k])||d}catch{return d}};
 let INV=ld('lk_inv',{}),ST=ld('lk_st',{p:0,cap:0,dice:0,h:[]}),G=null,busy=false,sfx=true,music=false,AC;
 let cfg={mode:'c',n:2,s:['H','medium','medium','medium']};
+const AVL=['🦁','🐯','🦊','🐼','🐸','🐵','🦄','🐲','🐧','🦉'];let PR=ld('lk_pr',{});for(const c in PR){NM[c]=PR[c].n;AV[c]=PR[c].a}
+const savePR=()=>{PR={};for(let c=0;c<4;c++)PR[c]={n:NM[c],a:AV[c]};localStorage.lk_pr=JSON.stringify(PR)};
+function pr(){$('#prof').innerHTML=[0,1,2,3].map(c=>`<div class=row style="align-items:center"><button data-a="${c}" style="border-color:${COL[c]}">${AV[c]}</button><input data-p="${c}" value="${NM[c]}" maxlength=10></div>`).join('')}
+$('#pfb').onclick=()=>{$('#prof').hidden=!$('#prof').hidden;pr()};
+$('#prof').onclick=e=>{const c=e.target.dataset.a;if(c!=null){AV[c]=AVL[(AVL.indexOf(AV[c])+1)%AVL.length];savePR();pr();mr()}};
+$('#prof').oninput=e=>{const c=e.target.dataset.p;if(c!=null){NM[c]=e.target.value.trim()||['Red','Green','Yellow','Blue'][c];savePR();mr()}};
 const store=()=>{localStorage.lk_inv=JSON.stringify(INV);localStorage.lk_st=JSON.stringify(ST)};
 const sleep=ms=>new Promise(r=>setTimeout(r,ms)),rnd=n=>Math.floor(Math.random()*n),ACT=()=>cfg.n==2?[0,2]:cfg.n==3?[0,1,2]:[0,1,2,3];
 function beep(f,d=.1,t='sine',v=.08,force){if(!sfx&&!force)return;try{AC=AC||new(window.AudioContext||webkitAudioContext)();const o=AC.createOscillator(),g=AC.createGain();o.type=t;o.frequency.value=f;g.gain.value=v;o.connect(g);g.connect(AC.destination);o.start();g.gain.exponentialRampToValueAtTime(.001,AC.currentTime+d);o.stop(AC.currentTime+d)}catch{}}
@@ -40,7 +48,7 @@ $('#menu').onclick=e=>{const d=e.target.dataset;if(d.m)cfg.mode=d.m;if(d.n)cfg.n
 $('#pf').onclick=()=>{cfg.s=['H','H','H','H'];mr()};$('#pcpu').onclick=()=>{cfg.s=['H','medium','medium','medium'];mr()};
 $('#inf').onclick=()=>{$('#info').hidden=false;$('#info').innerHTML=`<b>🎲 Special Dice Inventory (no limit)</b><br>`+[0,1,2,3].map(c=>`${AV[c]} ${NM[c]}: <b>${INV[c]||0}</b>`).join(' · ')+`<br>Total ever collected: ${ST.dice}<hr>Games finished: ${ST.p} · Captures: ${ST.cap}<br>`+ST.h.slice(-8).reverse().join('<br>')};
 function show(g){$('#menu').hidden=g;$('#game').hidden=!g;if(g)resize();else mr()}
-$('#go').onclick=()=>{G={mode:cfg.mode,turn:0,pl:ACT().map(c=>({c,ai:cfg.s[c]=='H'?0:cfg.s[c],t:[-1,-1,-1,-1],inv:cfg.s[c]=='H'?INV[c]||0:0}))};begin()};
+$('#go').onclick=()=>{G={mode:cfg.mode,turn:0,pl:ACT().map(c=>({c,ai:cfg.s[c]=='H'?0:cfg.s[c],t:[-1,-1,-1,-1],sh:[0,0,0,0],inv:cfg.s[c]=='H'?INV[c]||0:0}))};begin()};
 $('#res').onclick=()=>{G=ld('lk_save',null);if(G)begin()};
 function begin(){show(true);music=true;turn()}
 $('#mn').onclick=()=>{busy=true;show(false)};
@@ -57,27 +65,27 @@ if(l>2&&t>=0&&t<=50&&!SAFE.has(abs(p,t)))s+=danger(p,abs(p,t))*22}else s+=20;ret
 function pick(p,r,m){if(lv(p)==1)return m[rnd(m.length)];return m.reduce((b,i)=>score(p,i,r)>score(p,b,r)?i:b,m[0])}
 async function turn(){if(G.over)return;const p=cur();G.ph='roll';localStorage.lk_save=JSON.stringify(G);busy=false;ui();msg(`${AV[p.c]} ${NM[p.c]}'s turn`);
 if(p.ai){busy=true;ui();await sleep(800);if(lv(p)>1&&p.inv>0){let b=[0,0];for(let n=1;n<7;n++)for(const i of legal(p,n)){const s=score(p,i,n);if(s>b[0])b=[s,n]}if(b[0]>=(lv(p)>2?80:100)){use(p);return roll(b[1])}}roll()}}
-function ui(){const p=cur();$('#bar').innerHTML=G.pl.map((q,i)=>`<div class="pc${i==G.turn?' on':''}" style="border-color:${COL[q.c]}">${AV[q.c]}<small>${q.ai?'CPU '+q.ai:'Human'}</small>🏠${q.t.filter(x=>x==56).length} 🎲${q.inv}</div>`).join('');
+function ui(){const p=cur();$('#bar').innerHTML=G.pl.map((q,i)=>`<div class="pc${i==G.turn?' on':''}" style="border-color:${COL[q.c]}">${AV[q.c]}<small>${NM[q.c]}${q.ai?' 🤖':''}</small>🏠${q.t.filter(x=>x==56).length} 🎲${q.inv}</div>`).join('');
 $('#sp').hidden=!(!p.ai&&p.inv>0&&G.ph=='roll'&&!busy);$('#sp').textContent=`🎲 Use special dice ×${p.inv}`;$('#pk').hidden=true}
 $('#dice').onclick=()=>{if(!busy&&!cur().ai&&G.ph=='roll')roll()};
 $('#sp').onclick=()=>{$('#pk').hidden=!$('#pk').hidden};
 $('#pk').innerHTML=[1,2,3,4,5,6].map(n=>`<button data-n="${n}">${n}</button>`).join('');
 $('#pk').onclick=e=>{const n=+e.target.dataset.n;if(n&&!busy&&G.ph=='roll'&&cur().inv>0){use(cur());roll(n)}};
 async function roll(f){busy=true;const p=cur();ui();for(let k=0;k<8;k++){$('#dice').textContent=FACE[rnd(6)];beep(200+k*40,.05);await sleep(70)}
-const r=f||rnd(6)+1;G.roll=r;$('#dice').textContent=FACE[r-1];const m=legal(p,r);
+const r=f||rnd(6)+1;G.roll=r;if(r==6){G.six=(G.six||0)+1;if(G.six>=3){G.six=0;$('#dice').textContent=FACE[5];msg('🚫 Three 6s in a row! Turn lost');await sleep(1200);return nxt()}}else G.six=0;$('#dice').textContent=FACE[r-1];const m=legal(p,r);
 if(!m.length){msg(`Rolled ${r} - no move`);await sleep(800);return nxt()}
 if(p.ai||m.length==1){await sleep(300);return move(p,p.ai?pick(p,r,m):m[0],r)}
 G.ph='pick';busy=false;msg(`Rolled ${r} - tap a glowing token`)}
-function nxt(){G.turn=(G.turn+1)%G.pl.length;turn()}
+function nxt(){G.six=0;G.turn=(G.turn+1)%G.pl.length;turn()}
 async function move(p,i,r){busy=true;G.ph='x';const t=p.t,from=t[i],to=from<0?0:from+r;let ex=r==6,cap=0;
 if(from<0){t[i]=0;beep(500)}else for(let k=from+1;k<=to;k++){t[i]=k;beep(300+k*5,.05);await sleep(130)}
 if(to<=50){const a=abs(p,to);
-if(!SAFE.has(a))for(const o of G.pl)if(o!==p)o.t.forEach((q,j)=>{if(q>=0&&q<=50&&abs(o,q)==a){o.t[j]=-1;cap++}});
-if(G.mode=='t'&&TRICK.includes(a)){const e=rnd(4);await sleep(300);beep(700,.3,'square');
+if(!SAFE.has(a))for(const o of G.pl)if(o!==p)o.t.forEach((q,j)=>{if(q>=0&&q<=50&&abs(o,q)==a){if(o.sh&&o.sh[j]){o.sh[j]=0;msg('🛡️ Shield saved a token!')}else{o.t[j]=-1;cap++}}});
+if(G.mode=='t'&&TRICK.includes(a)){const e=rnd(5);await sleep(300);beep(700,.3,'square');
 if(e==0){gain(p,2);msg('🎁 Gift tile! +2 special dice')}
 else if(e==1&&to+4<=50){t[i]=to+4;msg('⚡ Boost! +4 steps')}
 else if(e==2&&to>=3){t[i]=to-3;msg('🕳️ Trap! back 3 steps')}
-else if(e==3){ex=true;msg('🔁 Bonus move!')}else msg('✨ Surprise tile - nothing happened')}}
+else if(e==3){ex=true;msg('🔁 Bonus move!')}else if(e==4){(p.sh=p.sh||[0,0,0,0])[i]=1;msg('🛡️ Shield! Safe from the next capture')}else msg('✨ Surprise tile - nothing happened')}}
 if(cap){ex=true;ST.cap+=cap;gain(p,cap);beep(120,.4,'sawtooth');msg(`💥 Captured ${cap}! +${cap} special dice`)}
 if(to==56){ex=true;gain(p,1);beep(900,.3);msg('🏠 Token home! +1 special dice')}
 ui();await sleep(600);
@@ -104,6 +112,7 @@ const mv=G.ph=='pick'?legal(cur(),G.roll):[],pulse=.5+.5*Math.sin(Date.now()/150
 G.pl.forEach(p=>p.t.forEach((q,i)=>{const[a,b]=xy(p,i);X.fillStyle='#0004';X.beginPath();X.arc(a*s,(b+.08)*s,.34*s,0,7);X.fill();
 X.fillStyle=COL[p.c];X.strokeStyle='#fff';X.lineWidth=s*.07;X.beginPath();X.arc(a*s,b*s,.33*s,0,7);X.fill();X.stroke();
 X.fillStyle='#fff7';X.beginPath();X.arc((a-.1)*s,(b-.1)*s,.1*s,0,7);X.fill();
+if(p.sh&&p.sh[i]){X.strokeStyle='#80d8ff';X.lineWidth=s*.08;X.beginPath();X.arc(a*s,b*s,.42*s,0,7);X.stroke()}
 if(p===cur()&&mv.includes(i)){X.strokeStyle=`rgba(255,255,255,${.4+pulse*.6})`;X.lineWidth=s*.1;X.beginPath();X.arc(a*s,b*s,(.45+pulse*.1)*s,0,7);X.stroke()}}))}
 (function loop(){draw();requestAnimationFrame(loop)})();
 if('serviceWorker' in navigator)navigator.serviceWorker.register('sw.js').catch(()=>{});

@@ -14,12 +14,41 @@ canvas{border-radius:14px;box-shadow:0 6px 24px #0008;touch-action:manipulation}
 #dice{font-size:64px;line-height:1;background:#fff;color:#222;border-radius:18px;width:92px;height:92px;padding:0}
 #msg{min-height:24px;font-weight:700}#pk button{width:46px;padding:10px 0}
 input{font:inherit;padding:9px;border-radius:10px;border:0;width:150px;margin:3px}
+body{background:radial-gradient(circle at 20% 0%,#4b2fbf,#1b1340 55%,#0e0a26);background-attachment:fixed}
+#menu{position:relative;overflow:hidden;padding-bottom:20px}#menu>*:not(.fl){position:relative;z-index:1}
+.fl{position:absolute;top:0;font-size:30px;opacity:.22;animation:fl 10s linear infinite;pointer-events:none}
+@keyframes fl{from{transform:translateY(110vh) rotate(0)}to{transform:translateY(-15vh) rotate(360deg)}}
+.logo{font-size:84px;line-height:1.1;animation:sp 4s ease-in-out infinite;filter:drop-shadow(0 8px 12px #0008)}
+@keyframes sp{0%,100%{transform:rotate(-12deg) scale(1)}50%{transform:rotate(12deg) scale(1.12)}}
+h1{font-size:46px;letter-spacing:2px;margin:0;filter:drop-shadow(0 0 12px #ffd74088)}
+.tag{opacity:.85;margin:2px 0 8px;font-size:15px}
+.dots{display:flex;justify-content:center;gap:8px;margin-bottom:12px}.dots i{width:18px;height:18px;border-radius:50%;border:2px solid #fff;box-shadow:0 2px 6px #0007}
+.card{background:#ffffff14;backdrop-filter:blur(8px);border:1px solid #ffffff22}
+button{box-shadow:0 4px 0 #0006}button:active{transform:translateY(3px);box-shadow:none}
+#go{background:linear-gradient(#4cd964,#1faa3b);font-size:22px;padding:15px;animation:pl 1.6s ease-in-out infinite}
+@keyframes pl{50%{transform:scale(1.04)}}
+#res,#inf,#pfb{background:linear-gradient(#6b4de0,#432fa8)}
+body{background:repeating-linear-gradient(45deg,#ffffff0a 0 28px,#0000 28px 56px),radial-gradient(circle at 50% 0,#2f6bff,#16339a 55%,#0a1a58);background-attachment:fixed}
+.top{display:flex;align-items:center;gap:8px;background:#0b1f6b;border-bottom:3px solid #f5b81c;border-radius:0 0 16px 16px;padding:8px 10px;margin:-10px -10px 6px;width:calc(100% + 20px)}
+.av{width:44px;height:44px;border-radius:50%;background:#fff;border:3px solid #f5b81c;font-size:26px;display:flex;align-items:center;justify-content:center}
+.pill{background:#071447;border-radius:14px;padding:5px 14px;font-weight:800;border:2px solid #f5b81c}
+.lg{margin:6px 0 10px}.crown{font-size:42px;line-height:1;filter:drop-shadow(0 3px 4px #0008)}
+.lt{display:inline-flex;width:56px;height:56px;border-radius:50%;background:#fff;border:5px solid;align-items:center;justify-content:center;font-size:32px;font-weight:900;margin:2px;box-shadow:0 4px 0 #0006}
+.sub{font-size:44px;font-weight:900;letter-spacing:6px;color:#ffd54a;-webkit-text-stroke:2px #5a3500;text-shadow:0 4px 0 #5a3500}
+.seg{display:flex;background:#071447;border-radius:30px;padding:4px;margin:8px 0}.seg button{flex:1;margin:0;background:none;box-shadow:none;border-radius:26px}
+.seg button.on{background:linear-gradient(#ffd54a,#f5a300);color:#3b2400}
+.grid{display:flex;flex-wrap:wrap;justify-content:center;gap:10px;margin:10px 0}
+.tile{width:calc(50% - 10px);height:135px;background:linear-gradient(#2e6bd9 62%,#f5b81c 62%);border:3px solid #f5b81c;border-radius:16px;padding:0;margin:0;position:relative;overflow:hidden;box-shadow:0 5px 0 #8a5a00}
+.tile .e{font-size:50px;display:block;margin-top:12px}.tile .l{position:absolute;bottom:5px;left:0;right:0;font-size:18px;letter-spacing:1px;-webkit-text-stroke:1px #4a2d00;text-shadow:0 2px 0 #4a2d00}
+.g3 .tile{width:calc(33.3% - 8px);height:115px}.g3 .e{font-size:24px;margin-top:22px}.g3 .l{font-size:14px}
+.tile.sel{outline:4px solid #fff}
+.gold{background:linear-gradient(#ffd54a,#f5a300);color:#3b2400;font-size:22px;padding:14px;border-color:#fff4;box-shadow:0 5px 0 #8a5a00}
+.back{background:none;box-shadow:none;opacity:.8}h2{margin:10px 0}
+.nav{display:flex;margin:18px -10px 0;width:calc(100% + 20px);background:#0b1f6b;border-top:3px solid #f5b81c}.nav button{flex:1;margin:0;border-radius:0;background:none;box-shadow:none}
 </style></head><body><div id=app>
-<div id=menu><h1>Rang Chaal</h1><p>Offline Ludo · Classic &amp; Tricky</p>
-<div class=card><b>Mode</b><div class=row id=mm></div><b>Players</b><div class=row id=pc></div><b>Seats (tap to change)</b><div class=row id=seats></div>
-<div class=row><button id=pf>👥 Friends</button><button id=pcpu>🤖 vs Computer</button></div></div>
-<button id=pfb class=big>👤 Player Profiles</button><div id=prof class=card hidden></div>
-<button id=go class=big>▶ Play</button><button id=res class=big>⏪ Resume saved game</button><button id=inf class=big>🎒 Inventory &amp; Stats</button><div id=info class=card hidden></div></div>
+<div id=menu><div class=top><div class=av id=tav>🦁</div><b id=tnm>Red</b><span style="flex:1"></span><span class=pill id=tmode>🎲 Classic</span></div>
+<div class=lg><div class=crown>👑</div><div><span class=lt style="color:#e53935;border-color:#e53935">R</span><span class=lt style="color:#43a047;border-color:#43a047">A</span><span class=lt style="color:#fbc02d;border-color:#fbc02d">N</span><span class=lt style="color:#1e88e5;border-color:#1e88e5">G</span></div><div class=sub>CHAAL</div></div>
+<div id=stage></div></div>
 <div id=game hidden><div id=bar></div><canvas id=cv></canvas><div id=msg></div>
 <button id=dice>⚀</button><div><button id=sp class=s hidden></button></div><div id=pk hidden></div>
 <div><button id=mn>☰ Menu</button><button id=sfxb>🔊</button><button id=mub>🎵</button></div></div></div>
@@ -30,33 +59,38 @@ const START=[0,13,26,39],SAFE=new Set([0,8,13,21,26,34,39,47]),TRICK=[3,10,16,23
 const HOME=(c,k)=>[[1+k,7],[7,1+k],[13-k,7],[7,13-k]][c],FIN=[[6.6,7.5],[7.5,6.6],[8.4,7.5],[7.5,8.4]];
 const ld=(k,d)=>{try{return JSON.parse(localStorage[k])||d}catch{return d}};
 let INV=ld('lk_inv',{}),ST=ld('lk_st',{p:0,cap:0,dice:0,h:[]}),G=null,busy=false,sfx=true,music=false,AC;
-let cfg={mode:'c',n:2,s:['H','medium','medium','medium']};
+let cfg={mode:'c',n:2,vs:'cpu',d:'medium'},step='home';const seat=c=>cfg.vs=='fr'||c==0?'H':cfg.d,DEF=['Red','Green','Yellow','Blue'];
 const AVL=['🦁','🐯','🦊','🐼','🐸','🐵','🦄','🐲','🐧','🦉'];let PR=ld('lk_pr',{});for(const c in PR){NM[c]=PR[c].n;AV[c]=PR[c].a}
 const savePR=()=>{PR={};for(let c=0;c<4;c++)PR[c]={n:NM[c],a:AV[c]};localStorage.lk_pr=JSON.stringify(PR)};
-function pr(){$('#prof').innerHTML=[0,1,2,3].map(c=>`<div class=row style="align-items:center"><button data-a="${c}" style="border-color:${COL[c]}">${AV[c]}</button><input data-p="${c}" value="${NM[c]}" maxlength=10></div>`).join('')}
-$('#pfb').onclick=()=>{$('#prof').hidden=!$('#prof').hidden;pr()};
-$('#prof').onclick=e=>{const c=e.target.dataset.a;if(c!=null){AV[c]=AVL[(AVL.indexOf(AV[c])+1)%AVL.length];savePR();pr();mr()}};
-$('#prof').oninput=e=>{const c=e.target.dataset.p;if(c!=null){NM[c]=e.target.value.trim()||['Red','Green','Yellow','Blue'][c];savePR();mr()}};
 const store=()=>{localStorage.lk_inv=JSON.stringify(INV);localStorage.lk_st=JSON.stringify(ST)};
 const sleep=ms=>new Promise(r=>setTimeout(r,ms)),rnd=n=>Math.floor(Math.random()*n),ACT=()=>cfg.n==2?[0,2]:cfg.n==3?[0,1,2]:[0,1,2,3];
 function beep(f,d=.1,t='sine',v=.08,force){if(!sfx&&!force)return;try{AC=AC||new(window.AudioContext||webkitAudioContext)();const o=AC.createOscillator(),g=AC.createGain();o.type=t;o.frequency.value=f;g.gain.value=v;o.connect(g);g.connect(AC.destination);o.start();g.gain.exponentialRampToValueAtTime(.001,AC.currentTime+d);o.stop(AC.currentTime+d)}catch{}}
 const NOTES=[262,330,392,523,392,330,294,370,440,587,440,370];let ni=0;setInterval(()=>{if(music)beep(NOTES[ni++%12],.4,'triangle',.03,1)},450);
-function mr(){$('#mm').innerHTML=[['c','Classic'],['t','Tricky']].map(([k,l])=>`<button class="${cfg.mode==k?'on':''}" data-m="${k}">${l}</button>`).join('');
-$('#pc').innerHTML=[2,3,4].map(k=>`<button class="${cfg.n==k?'on':''}" data-n="${k}">${k}</button>`).join('');
-$('#seats').innerHTML=ACT().map(c=>`<button style="border-color:${COL[c]}" data-s="${c}">${AV[c]} ${NM[c]}: ${cfg.s[c]=='H'?'Human':'CPU '+cfg.s[c]}</button>`).join('');$('#res').hidden=!localStorage.lk_save}
-$('#menu').onclick=e=>{const d=e.target.dataset;if(d.m)cfg.mode=d.m;if(d.n)cfg.n=+d.n;if(d.s){const o=['H','easy','medium','hard'];cfg.s[d.s]=o[(o.indexOf(cfg.s[d.s])+1)%4]}mr()};
-$('#pf').onclick=()=>{cfg.s=['H','H','H','H'];mr()};$('#pcpu').onclick=()=>{cfg.s=['H','medium','medium','medium'];mr()};
-$('#inf').onclick=()=>{$('#info').hidden=false;$('#info').innerHTML=`<b>🎲 Special Dice Inventory (no limit)</b><br>`+[0,1,2,3].map(c=>`${AV[c]} ${NM[c]}: <b>${INV[c]||0}</b>`).join(' · ')+`<br>Total ever collected: ${ST.dice}<hr>Games finished: ${ST.p} · Captures: ${ST.cap}<br>`+ST.h.slice(-8).reverse().join('<br>')};
-function show(g){$('#menu').hidden=g;$('#game').hidden=!g;if(g)resize();else mr()}
-$('#go').onclick=()=>{G={mode:cfg.mode,turn:0,pl:ACT().map(c=>({c,ai:cfg.s[c]=='H'?0:cfg.s[c],t:[-1,-1,-1,-1],sh:[0,0,0,0],inv:cfg.s[c]=='H'?INV[c]||0:0}))};begin()};
-$('#res').onclick=()=>{G=ld('lk_save',null);if(G)begin()};
+function mr(){$('#tav').textContent=AV[0];$('#tnm').textContent=NM[0];$('#tmode').textContent=cfg.mode=='t'?'⚡ Tricky':'🎲 Classic';const m=$('#stage'),cpu=cfg.vs=='cpu';
+if(step=='home')m.innerHTML=`<div class=seg><button data-m=c class="${cfg.mode=='c'?'on':''}">🎲 Classic</button><button data-m=t class="${cfg.mode=='t'?'on':''}">⚡ Tricky</button></div>
+<div class=grid><button class=tile data-go=cpu><span class=e>🤖</span><span class=l>COMPUTER</span></button><button class=tile data-go=fr><span class=e>👥</span><span class=l>FRIENDS</span></button></div>
+${localStorage.lk_save?'<button class="gold big" data-go=resume>⏪ RESUME GAME</button>':''}
+<div class=nav><button data-go=home>🏠<br>HOME</button><button data-go=inv>📊<br>STATS</button></div>`;
+else if(step=='count')m.innerHTML=`<h2>How many players?</h2><div class="grid g3">${[2,3,4].map(n=>`<button class="tile${cfg.n==n?' sel':''}" data-n=${n}><span class=e>${'👤'.repeat(n)}</span><span class=l>${n} PLAYERS</span></button>`).join('')}</div>
+${cpu?`<b>Computer level</b><div class=row style="justify-content:center">${['easy','medium','hard'].map(d=>`<button data-d=${d} class="${cfg.d==d?'on':''}">${d.toUpperCase()}</button>`).join('')}</div>`:''}
+<button class="gold big" data-go=names>NEXT ➜</button><button class="back big" data-go=home>⬅ Back</button>`;
+else if(step=='names')m.innerHTML=`<h2>Player names</h2>`+ACT().map(c=>seat(c)=='H'?`<div class=row style="justify-content:center;align-items:center"><button data-a=${c} style="border-color:${COL[c]}">${AV[c]}</button><input data-p=${c} value="${NM[c]}" maxlength=10></div>`:`<div class=row style="justify-content:center;align-items:center"><button disabled style="border-color:${COL[c]}">${AV[c]}</button><input disabled value="Computer (${cfg.d})"></div>`).join('')+`<p style="opacity:.7;font-size:13px">Tap the avatar to change it</p><button class="gold big" data-go=ready>NEXT ➜</button><button class="back big" data-go=count>⬅ Back</button>`;
+else if(step=='ready')m.innerHTML=`<h2>Ready?</h2><div class=card>${cfg.mode=='t'?'⚡ Tricky':'🎲 Classic'} · ${cpu?'vs Computer':'Friends'}<hr>`+ACT().map(c=>`<span style="color:${COL[c]}">●</span> ${AV[c]} ${seat(c)=='H'?NM[c]:'Computer ('+cfg.d+')'}`).join('<br>')+`</div><button id=go class="gold big">▶ START GAME</button><button class="back big" data-go=names>⬅ Back</button>`;
+else m.innerHTML=`<h2>📊 Stats</h2><div class=card><b>⚡ Special dice</b><br><small>Only in Tricky mode. Every game starts at 0, no limit, and they reset when the game ends.</small><hr>Games finished: ${ST.p} · Captures: ${ST.cap}<br>`+ST.h.slice(-8).reverse().join('<br>')+`</div><button class="back big" data-go=home>⬅ Back</button>`}
+$('#menu').onclick=e=>{const b=e.target.closest('button');if(!b)return;const d=b.dataset;if(d.m)cfg.mode=d.m;if(d.n)cfg.n=+d.n;if(d.d)cfg.d=d.d;
+if(d.a!=null){AV[d.a]=AVL[(AVL.indexOf(AV[d.a])+1)%AVL.length];savePR()}
+if(d.go=='cpu'||d.go=='fr'){cfg.vs=d.go;step='count'}else if(d.go=='resume'){G=ld('lk_save',null);if(G)return begin()}else if(d.go)step=d.go;
+if(b.id=='go')return startGame();mr()};
+$('#menu').oninput=e=>{const c=e.target.dataset.p;if(c!=null){NM[c]=e.target.value.trim()||DEF[c];savePR()}};
+function startGame(){G={mode:cfg.mode,turn:0,pl:ACT().map(c=>{const h=seat(c)=='H';return{c,ai:h?0:cfg.d,t:[-1,-1,-1,-1],sh:[0,0,0,0],inv:0}})};begin()}
+function show(g){$('#menu').hidden=g;$('#game').hidden=!g;if(g)resize();else{step='home';mr()}}
 function begin(){show(true);music=true;turn()}
 $('#mn').onclick=()=>{busy=true;show(false)};
 $('#sfxb').onclick=e=>{sfx=!sfx;e.target.textContent=sfx?'🔊':'🔇'};$('#mub').onclick=e=>{music=!music;e.target.style.opacity=music?1:.4};
 const lv=p=>({easy:1,medium:2,hard:3})[p.ai],cur=()=>G.pl[G.turn],msg=t=>$('#msg').textContent=t;
 const legal=(p,r)=>[0,1,2,3].filter(i=>p.t[i]<0?r==6:p.t[i]+r<=56);
-function gain(p,n){p.inv+=n;if(!p.ai){INV[p.c]=p.inv;ST.dice+=n;store()}}
-function use(p){p.inv--;if(!p.ai){INV[p.c]=p.inv;store()}}
+function gain(p,n){if(G.mode=='t')p.inv+=n}
+function use(p){p.inv--}
 const abs=(p,q)=>(START[p.c]+q)%52;
 function danger(p,a){let n=0;for(const o of G.pl)if(o!==p)for(const q of o.t)if(q>=0&&q<=50){const d=(a-abs(o,q)+52)%52;if(d>=1&&d<=6)n++}return n}
 function score(p,i,r){const t=p.t[i],to=t<0?0:t+r,l=lv(p);let s=Math.random()*5+to*.3;if(to==56)s+=80;if(t<0)s+=45;
@@ -65,7 +99,7 @@ if(l>2&&t>=0&&t<=50&&!SAFE.has(abs(p,t)))s+=danger(p,abs(p,t))*22}else s+=20;ret
 function pick(p,r,m){if(lv(p)==1)return m[rnd(m.length)];return m.reduce((b,i)=>score(p,i,r)>score(p,b,r)?i:b,m[0])}
 async function turn(){if(G.over)return;const p=cur();G.ph='roll';localStorage.lk_save=JSON.stringify(G);busy=false;ui();msg(`${AV[p.c]} ${NM[p.c]}'s turn`);
 if(p.ai){busy=true;ui();await sleep(800);if(lv(p)>1&&p.inv>0){let b=[0,0];for(let n=1;n<7;n++)for(const i of legal(p,n)){const s=score(p,i,n);if(s>b[0])b=[s,n]}if(b[0]>=(lv(p)>2?80:100)){use(p);return roll(b[1])}}roll()}}
-function ui(){const p=cur();$('#bar').innerHTML=G.pl.map((q,i)=>`<div class="pc${i==G.turn?' on':''}" style="border-color:${COL[q.c]}">${AV[q.c]}<small>${NM[q.c]}${q.ai?' 🤖':''}</small>🏠${q.t.filter(x=>x==56).length} 🎲${q.inv}</div>`).join('');
+function ui(){const p=cur();$('#bar').innerHTML=G.pl.map((q,i)=>`<div class="pc${i==G.turn?' on':''}" style="border-color:${COL[q.c]}">${AV[q.c]}<small>${NM[q.c]}${q.ai?' 🤖':''}</small>🏠${q.t.filter(x=>x==56).length}${G.mode=='t'?' 🎲'+q.inv:''}</div>`).join('');
 $('#sp').hidden=!(!p.ai&&p.inv>0&&G.ph=='roll'&&!busy);$('#sp').textContent=`🎲 Use special dice ×${p.inv}`;$('#pk').hidden=true}
 $('#dice').onclick=()=>{if(!busy&&!cur().ai&&G.ph=='roll')roll()};
 $('#sp').onclick=()=>{$('#pk').hidden=!$('#pk').hidden};
@@ -86,8 +120,8 @@ if(e==0){gain(p,2);msg('🎁 Gift tile! +2 special dice')}
 else if(e==1&&to+4<=50){t[i]=to+4;msg('⚡ Boost! +4 steps')}
 else if(e==2&&to>=3){t[i]=to-3;msg('🕳️ Trap! back 3 steps')}
 else if(e==3){ex=true;msg('🔁 Bonus move!')}else if(e==4){(p.sh=p.sh||[0,0,0,0])[i]=1;msg('🛡️ Shield! Safe from the next capture')}else msg('✨ Surprise tile - nothing happened')}}
-if(cap){ex=true;ST.cap+=cap;gain(p,cap);beep(120,.4,'sawtooth');msg(`💥 Captured ${cap}! +${cap} special dice`)}
-if(to==56){ex=true;gain(p,1);beep(900,.3);msg('🏠 Token home! +1 special dice')}
+if(cap){ex=true;ST.cap+=cap;gain(p,cap);beep(120,.4,'sawtooth');msg(`💥 Captured ${cap}!${G.mode=='t'?' +'+cap+' special dice':''}`)}
+if(to==56){ex=true;gain(p,1);beep(900,.3);msg(G.mode=='t'?'🏠 Token home! +1 special dice':'🏠 Token home!')}
 ui();await sleep(600);
 if(t.every(q=>q==56)){G.over=true;delete localStorage.lk_save;ST.p++;ST.h.push(`${new Date().toLocaleDateString()} · ${G.mode=='t'?'Tricky':'Classic'} · ${AV[p.c]} ${NM[p.c]} won`);store();msg(`🏆 ${NM[p.c]} wins! Open Menu for a new game`);[523,659,784,1047].forEach((f,k)=>setTimeout(()=>beep(f,.3),k*200));return}
 ex?turn():nxt()}

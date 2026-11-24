@@ -45,10 +45,17 @@ body{background:repeating-linear-gradient(45deg,#ffffff0a 0 28px,#0000 28px 56px
 .gold{background:linear-gradient(#ffd54a,#f5a300);color:#3b2400;font-size:22px;padding:14px;border-color:#fff4;box-shadow:0 5px 0 #8a5a00}
 .back{background:none;box-shadow:none;opacity:.8}h2{margin:10px 0}
 .nav{display:flex;margin:18px -10px 0;width:calc(100% + 20px);background:#0b1f6b;border-top:3px solid #f5b81c}.nav button{flex:1;margin:0;border-radius:0;background:none;box-shadow:none}
+canvas{box-shadow:0 0 0 5px #f5b81c,0 10px 26px #000a}
+#dice{background:radial-gradient(circle at 30% 25%,#fff,#d6d6d6);box-shadow:0 6px 0 #999,0 12px 16px #0007}#dice:active{transform:translateY(4px)}
+@keyframes shake{0%,100%{transform:rotate(-12deg)}50%{transform:rotate(12deg) scale(1.12)}}#dice.rl{animation:shake .25s infinite}
+#win{position:fixed;inset:0;background:#000b;display:flex;align-items:center;justify-content:center;z-index:9;overflow:hidden}
+#win .card{max-width:340px;text-align:center;border:3px solid #f5b81c;background:#1a2f8a}.trophy{font-size:80px;animation:sp 2s ease-in-out infinite}
 </style></head><body><div id=app>
 <div id=menu><div class=top><div class=av id=tav>🦁</div><b id=tnm>Red</b><span style="flex:1"></span><span class=pill id=tmode>🎲 Classic</span></div>
 <div class=lg><div class=crown>👑</div><div><span class=lt style="color:#e53935;border-color:#e53935">R</span><span class=lt style="color:#43a047;border-color:#43a047">A</span><span class=lt style="color:#fbc02d;border-color:#fbc02d">N</span><span class=lt style="color:#1e88e5;border-color:#1e88e5">G</span></div><div class=sub>CHAAL</div></div>
 <div id=stage></div></div>
+<div id=win hidden><span class=fl style="left:10%">🎉</span><span class=fl style="left:35%;animation-delay:-4s">⭐</span><span class=fl style="left:60%;animation-delay:-2s">🎊</span><span class=fl style="left:85%;animation-delay:-6s">⭐</span>
+<div class=card><div class=trophy>🏆</div><h2 id=wn></h2><p id=ws></p><button id=wagain class="gold big">🔁 Play again</button><button id=whome class="back big">🏠 Menu</button></div></div>
 <div id=game hidden><div id=bar></div><canvas id=cv></canvas><div id=msg></div>
 <button id=dice>⚀</button><div><button id=sp class=s hidden></button><button id=bl class=s hidden></button></div><div id=pk hidden></div>
 <div><button id=mn>☰ Menu</button><button id=sfxb>🔊</button><button id=mub>🎵</button></div></div></div>
@@ -82,9 +89,10 @@ if(d.a!=null){AV[d.a]=AVL[(AVL.indexOf(AV[d.a])+1)%AVL.length];savePR()}
 if(d.go=='cpu'||d.go=='fr'){cfg.vs=d.go;step='count'}else if(d.go=='resume'){G=ld('lk_save',null);if(G)return begin()}else if(d.go)step=d.go;
 if(b.id=='go')return startGame();mr()};
 $('#menu').oninput=e=>{const c=e.target.dataset.p;if(c!=null){NM[c]=e.target.value.trim()||DEF[c];savePR()}};
+$('#wagain').onclick=()=>startGame();$('#whome').onclick=()=>{$('#win').hidden=true;show(false)};
 function startGame(){G={mode:cfg.mode,turn:0,bk:[],pk:cfg.mode=='t'?mkPk():[],pl:ACT().map(c=>{const h=seat(c)=='H';return{c,ai:h?0:cfg.d,t:[-1,-1,-1,-1],sh:[0,0,0,0],inv:0,bl:0}})};begin()}
 function show(g){$('#menu').hidden=g;$('#game').hidden=!g;if(g)resize();else{step='home';mr()}}
-function begin(){show(true);music=true;turn()}
+function begin(){$('#win').hidden=true;show(true);music=true;turn()}
 $('#mn').onclick=()=>{busy=true;show(false)};
 $('#sfxb').onclick=e=>{sfx=!sfx;e.target.textContent=sfx?'🔊':'🔇'};$('#mub').onclick=e=>{music=!music;e.target.style.opacity=music?1:.4};
 const lv=p=>({easy:1,medium:2,hard:3})[p.ai],cur=()=>G.pl[G.turn],msg=t=>$('#msg').textContent=t;
@@ -111,7 +119,7 @@ $('#dice').onclick=()=>{if(!busy&&!cur().ai&&G.ph=='roll')roll()};
 $('#sp').onclick=()=>{$('#pk').hidden=!$('#pk').hidden};
 $('#pk').innerHTML=[1,2,3,4,5,6].map(n=>`<button data-n="${n}">${n}</button>`).join('');
 $('#pk').onclick=e=>{const n=+e.target.dataset.n;if(n&&!busy&&G.ph=='roll'&&cur().inv>0){use(cur());roll(n)}};
-async function roll(f){busy=true;const p=cur();ui();for(let k=0;k<8;k++){$('#dice').textContent=FACE[rnd(6)];beep(200+k*40,.05);await sleep(70)}
+async function roll(f){busy=true;const p=cur();ui();$('#dice').classList.add('rl');for(let k=0;k<8;k++){$('#dice').textContent=FACE[rnd(6)];beep(200+k*40,.05);await sleep(70)}$('#dice').classList.remove('rl');
 const r=f||rnd(6)+1;G.roll=r;if(r==6){G.six=(G.six||0)+1;if(G.six>=3){G.six=0;$('#dice').textContent=FACE[5];msg('🚫 Three 6s in a row! Turn lost');await sleep(1200);return nxt()}}else G.six=0;$('#dice').textContent=FACE[r-1];const m=legal(p,r);
 if(!m.length){msg(`Rolled ${r} - no move${(G.bk||[]).some(b=>b.o!=p.c)?' (🚧 roadblock)':''}`);await sleep(800);return nxt()}
 if(p.ai||m.length==1){await sleep(300);return move(p,p.ai?pick(p,r,m):m[0],r)}
@@ -125,7 +133,7 @@ if(G.mode=='t'){const k=(G.pk||[]).find(x=>x.a==a);if(k){await sleep(250);beep(8
 if(cap){ex=true;ST.cap+=cap;gain(p,cap);beep(120,.4,'sawtooth');msg(`💥 Captured ${cap}!${G.mode=='t'?' +'+cap+' special dice':''}`)}
 if(to==56){ex=true;gain(p,1);beep(900,.3);msg(G.mode=='t'?'🏠 Token home! +1 special dice':'🏠 Token home!')}
 ui();await sleep(600);
-if(t.every(q=>q==56)){G.over=true;delete localStorage.lk_save;ST.p++;ST.h.push(`${new Date().toLocaleDateString()} · ${G.mode=='t'?'Tricky':'Classic'} · ${AV[p.c]} ${NM[p.c]} won`);store();msg(`🏆 ${NM[p.c]} wins! Open Menu for a new game`);[523,659,784,1047].forEach((f,k)=>setTimeout(()=>beep(f,.3),k*200));return}
+if(t.every(q=>q==56)){G.over=true;delete localStorage.lk_save;ST.p++;ST.h.push(`${new Date().toLocaleDateString()} · ${G.mode=='t'?'Tricky':'Classic'} · ${AV[p.c]} ${NM[p.c]} won`);store();msg(`🏆 ${NM[p.c]} wins!`);$('#wn').textContent=`${AV[p.c]} ${NM[p.c]} wins!`;$('#ws').textContent=`Games finished: ${ST.p}`;$('#win').hidden=false;[523,659,784,1047].forEach((f,k)=>setTimeout(()=>beep(f,.3),k*200));return}
 ex?turn():nxt()}
 function xy(p,i){const q=p.t[i];if(q<0){const[a,b]=YS[i],[ox,oy]=YO[p.c];return[ox+a,oy+b]}
 if(q<=50){const c=P[abs(p,q)];return[c[0]+.5+(i-1.5)*.06,c[1]+.5+(i-1.5)*.06]}
@@ -138,14 +146,4 @@ if(G.ph=='place'){const i=P.findIndex(c=>c[0]==Math.floor(x)&&c[1]==Math.floor(y
 if(G.ph!='pick')return;
 for(const i of legal(p,G.roll)){const[a,c]=xy(p,i);if(Math.hypot(a-x,c-y)<.8){return move(p,i,G.roll)}}};
 function draw(){const s=cv.width/15;if(!G||$('#game').hidden)return;X.fillStyle='#fff8e1';X.fillRect(0,0,cv.width,cv.width);
-for(let c=0;c<4;c++){const[ox,oy]=YO[c];X.fillStyle=COL[c];X.fillRect(ox*s,oy*s,6*s,6*s);X.fillStyle='#fff8e1';X.fillRect((ox+1)*s,(oy+1)*s,4*s,4*s);
-if(G.pl.some(q=>q.c==c))YS.forEach(([a,b])=>{X.fillStyle=COL[c]+'55';X.beginPath();X.arc((ox+a)*s,(oy+b)*s,.55*s,0,7);X.fill()})}
-X.font=`${s*.6}px sans-serif`;X.textAlign='center';X.textBaseline='middle';
-P.forEach(([a,b],i)=>{X.fillStyle='#fff';X.fillRect(a*s,b*s,s,s);const c=START.indexOf(i);if(c>=0){X.fillStyle=COL[c];X.fillRect(a*s,b*s,s,s)}
-X.strokeStyle='#8886';X.strokeRect(a*s,b*s,s,s);if(SAFE.has(i)){X.fillStyle=c>=0?'#fff':'#999';X.fillText('★',(a+.5)*s,(b+.55)*s)}
-else{const k=(G.pk||[]).find(x=>x.a==i);if(k){X.fillStyle='#f3e5f5';X.fillRect(a*s+1,b*s+1,s-2,s-2);X.fillStyle='#000';X.fillText(k.t=='d'?'🎲':'🚧',(a+.5)*s,(b+.55)*s)}}});
-for(let c=0;c<4;c++)for(let k=0;k<5;k++){const[a,b]=HOME(c,k);X.fillStyle=COL[c];X.fillRect(a*s,b*s,s,s);X.strokeStyle='#fff6';X.strokeRect(a*s,b*s,s,s)}
-[[[6,6],[6,9]],[[6,6],[9,6]],[[9,6],[9,9]],[[6,9],[9,9]]].forEach(([u,v],c)=>{X.fillStyle=COL[c];X.beginPath();X.moveTo(u[0]*s,u[1]*s);X.lineTo(v[0]*s,v[1]*s);X.lineTo(7.5*s,7.5*s);X.fill()});
-(G.bk||[]).forEach(k=>{const[a,b]=P[k.a];X.strokeStyle=COL[k.o];X.lineWidth=s*.12;X.strokeRect(a*s+2,b*s+2,s-4,s-4);X.fillStyle='#000';X.fillText('🚧',(a+.5)*s,(b+.55)*s)});
-const mv=G.ph=='pick'?legal(cur(),G.roll):[],pulse=.5+.5*Math.sin(Date.now()/150);
-G.pl.forEach(p=>p.t.forEach((q,i)=>{const[a,b]=xy(p,i);X.fillStyle='#0004';X.beginPath();X.arc(a*s,(b+.08)*s,.34*s,0
+for(let c=0;c<4;c++){const[ox,oy]=YO[c];X.fillStyle=COL[c];X.fillRect(ox*s,oy*s,6*s,6*s);X.fillStyle='#fffdf5';X.beginPath();X.roundRect?X.roundRect((ox+.8)*s,(oy+.8)*s,4.4*s,4.4*s,.6*s):X.rect((ox+.8)

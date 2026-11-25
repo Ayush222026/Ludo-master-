@@ -1,0 +1,15 @@
+<!DOCTYPE html><meta charset=utf-8><meta name=viewport content="width=device-width,initial-scale=1"><title>Rang Chaal check</title><body style="font:16px sans-serif;background:#111;color:#fff;padding:14px"><h2>Rang Chaal check</h2><pre id=o style="white-space:pre-wrap;word-break:break-all">Running...</pre><script>
+var o=document.getElementById('o'),t='';function L(x){t+=x+'\n';o.textContent=t}
+L('Browser: '+navigator.userAgent);L('JS runs: OK');
+try{eval('(async function(){})');L('async: OK')}catch(e){L('async: FAIL '+e)}
+try{eval('try{}catch{}');L('optional catch: OK')}catch(e){L('optional catch: FAIL')}
+try{localStorage.setItem('x','1');L('localStorage: OK')}catch(e){L('localStorage: FAIL '+e)}
+L('canvas: '+(document.createElement('canvas').getContext?'OK':'FAIL'));
+fetch('index.html?'+Date.now(),{cache:'no-store'}).then(function(r){return r.text()}).then(function(h){
+L('index.html size: '+h.length+' chars (expected about 24000)');L('ends with: '+h.slice(-40).replace(/\n/g,' '));
+var i=h.indexOf('const $=');if(i<0){L('MAIN SCRIPT NOT FOUND (old or broken file)');return}
+var a=h.lastIndexOf('<script>',i)+8,j=h.indexOf('</script>',i);
+try{new Function(h.slice(a,j));L('game code compiles: OK')}catch(e){L('game code ERROR: '+e.message)}
+L('has error guard: '+(h.indexOf('onerror=function')>=0));L('has new tiles code: '+(h.indexOf('ddddbbss')>=0));
+}).catch(function(e){L('fetch failed: '+e)});
+</script>

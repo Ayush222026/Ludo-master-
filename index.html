@@ -59,6 +59,7 @@ canvas{box-shadow:0 0 0 5px #f5b81c,0 10px 26px #000a}
 <div id=game hidden><div id=bar></div><canvas id=cv></canvas><div id=msg></div>
 <button id=dice>⚀</button><div><button id=sp class=s hidden></button><button id=bl class=s hidden></button></div><div id=pk hidden></div>
 <div><button id=mn>☰ Menu</button><button id=sfxb>🔊</button><button id=mub>🎵</button></div></div></div>
+<script>onerror=function(m,u,l){var d=document.getElementById('stage');if(d)d.innerHTML='<div style="padding:12px;background:#5a0000;border-radius:12px;font-size:14px;text-align:left;word-break:break-all">⚠️ Error: '+m+' (line '+l+')<br>Send me a screenshot of this.</div>'}</script>
 <script>
 const $=s=>document.querySelector(s),COL=['#e53935','#43a047','#fdd835','#1e88e5'],NM=['Red','Green','Yellow','Blue'],AV=['🦁','🐯','🦊','🐼'],FACE='⚀⚁⚂⚃⚄⚅'.split('');
 const P="1,6 2,6 3,6 4,6 5,6 6,5 6,4 6,3 6,2 6,1 6,0 7,0 8,0 8,1 8,2 8,3 8,4 8,5 9,6 10,6 11,6 12,6 13,6 14,6 14,7 14,8 13,8 12,8 11,8 10,8 9,8 8,9 8,10 8,11 8,12 8,13 8,14 7,14 6,14 6,13 6,12 6,11 6,10 6,9 5,8 4,8 3,8 2,8 1,8 0,8 0,7 0,6".split(' ').map(s=>s.split(',').map(Number));
@@ -142,5 +143,4 @@ if(q<=55){const c=HOME(p.c,q-51);return[c[0]+.5,c[1]+.5]}return[FIN[p.c][0]+(i-1
 const cv=$('#cv'),X=cv.getContext('2d');
 function resize(){const w=Math.min(innerWidth-20,480),d=devicePixelRatio||1;cv.style.width=cv.style.height=w+'px';cv.width=cv.height=Math.round(w*d)}
 addEventListener('resize',()=>{if(!$('#game').hidden)resize()});
-cv.onclick=e=>{if(!G||busy)return;const b=cv.getBoundingClientRect(),x=(e.clientX-b.left)/b.width*15,y=(e.clientY-b.top)/b.height*15,p=cur();
-if(G.ph=='place'){const i=P.findIndex(c=>c[0]==Math.floor(x)&&c[1]==Math.floor(y));if(i<0){msg('Tap a cell on the path');return}p.bl--;G.bk.push({a:i,o:p.c});G.ph='roll';ui();msg('🚧 Roadblock placed! Now roll the dice');beep(250,
+cv.onclick=e=>{if(!G||busy)return;const b=cv.getBoundingClientRect(),x=(e.clientX-b.left

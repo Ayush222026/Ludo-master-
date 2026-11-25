@@ -11,28 +11,44 @@ const store=()=>{localStorage.lk_inv=JSON.stringify(INV);localStorage.lk_st=JSON
 const sleep=ms=>new Promise(r=>setTimeout(r,ms)),rnd=n=>Math.floor(Math.random()*n),ACT=()=>cfg.n==2?[0,2]:cfg.n==3?[0,1,2]:[0,1,2,3];
 function beep(f,d=.1,t='sine',v=.08,force){if(!sfx&&!force)return;try{AC=AC||new(window.AudioContext||webkitAudioContext)();const o=AC.createOscillator(),g=AC.createGain();o.type=t;o.frequency.value=f;g.gain.value=v;o.connect(g);g.connect(AC.destination);o.start();g.gain.exponentialRampToValueAtTime(.001,AC.currentTime+d);o.stop(AC.currentTime+d)}catch(e){}}
 const NOTES=[262,330,392,523,392,330,294,370,440,587,440,370];let ni=0;setInterval(()=>{if(music)beep(NOTES[ni++%12],.4,'triangle',.03,1)},450);
-function mr(){$('#tav').textContent=AV[0];$('#tnm').textContent=NM[0];$('#tmode').textContent=cfg.mode=='t'?'⚡ Tricky':'🎲 Classic';const m=$('#stage'),cpu=cfg.vs=='cpu';
-if(step=='home')m.innerHTML=`<div class=seg><button data-m=c class="${cfg.mode=='c'?'on':''}">🎲 Classic</button><button data-m=t class="${cfg.mode=='t'?'on':''}">⚡ Tricky</button></div>
-<div class=grid><button class=tile data-go=cpu><span class=e>🤖</span><span class=l>COMPUTER</span></button><button class=tile data-go=fr><span class=e>👥</span><span class=l>FRIENDS</span></button></div>
-${localStorage.lk_save?'<button class="gold big" data-go=resume>⏪ RESUME GAME</button>':''}
-<div class=nav><button data-go=home>🏠<br>HOME</button><button data-go=inv>📊<br>STATS</button></div>`;
-else if(step=='count')m.innerHTML=`<h2>How many players?</h2><div class="grid g3">${[2,3,4].map(n=>`<button class="tile${cfg.n==n?' sel':''}" data-n=${n}><span class=e>${'👤'.repeat(n)}</span><span class=l>${n} PLAYERS</span></button>`).join('')}</div>
-${cpu?`<b>Computer level</b><div class=row style="justify-content:center">${['easy','medium','hard'].map(d=>`<button data-d=${d} class="${cfg.d==d?'on':''}">${d.toUpperCase()}</button>`).join('')}</div>`:''}
-<button class="gold big" data-go=names>NEXT ➜</button><button class="back big" data-go=home>⬅ Back</button>`;
-else if(step=='names')m.innerHTML=`<h2>Player names</h2>`+ACT().map(c=>seat(c)=='H'?`<div class=row style="justify-content:center;align-items:center"><button data-a=${c} style="border-color:${COL[c]}">${AV[c]}</button><input data-p=${c} value="${NM[c]}" maxlength=10></div>`:`<div class=row style="justify-content:center;align-items:center"><button disabled style="border-color:${COL[c]}">${AV[c]}</button><input disabled value="Computer (${cfg.d})"></div>`).join('')+`<p style="opacity:.7;font-size:13px">Tap the avatar to change it</p><button class="gold big" data-go=ready>NEXT ➜</button><button class="back big" data-go=count>⬅ Back</button>`;
-else if(step=='ready')m.innerHTML=`<h2>Ready?</h2><div class=card>${cfg.mode=='t'?'⚡ Tricky':'🎲 Classic'} · ${cpu?'vs Computer':'Friends'}<hr>`+ACT().map(c=>`<span style="color:${COL[c]}">●</span> ${AV[c]} ${seat(c)=='H'?NM[c]:'Computer ('+cfg.d+')'}`).join('<br>')+`</div><button id=go class="gold big">▶ START GAME</button><button class="back big" data-go=names>⬅ Back</button>`;
-else m.innerHTML=`<h2>📊 Stats</h2><div class=card><b>⚡ Special dice &amp; 🚧 roadblocks</b><br><small>Only in Tricky mode. Pick up 🎲 / 🚧 / 🛡️ from tiles on the path (a tile jumps elsewhere after pickup). ⚡ boosts you +4, 🕳️ traps you −3. Start at 0 each game, no limit, reset at game end.</small><hr>Games finished: ${ST.p} · Captures: ${ST.cap}<br>`+ST.h.slice(-8).reverse().join('<br>')+`</div><button class="back big" data-go=home>⬅ Back</button>`}
+let SET=ld('lk_set',{sfx:1,music:1,vib:1,lang:'en'});ST.w=ST.w||{};ST.m=ST.m||{c:0,t:0};sfx=!!SET.sfx;
+const sv=()=>{localStorage.lk_set=JSON.stringify(SET)},vib=n=>{if(SET.vib&&navigator.vibrate)try{navigator.vibrate(n)}catch(e){}};
+const esc=x=>String(x).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+let DP=null;addEventListener('beforeinstallprompt',e=>{e.preventDefault();DP=e;if(step=='set')mr()});
+const T={en:{cl:'🎲 Classic',tr:'⚡ Tricky',cpu:'COMPUTER',fr:'FRIENDS',res:'⏪ RESUME GAME',home:'HOME',how:'HELP',stats:'STATS',set:'SETTINGS',hp:'How many players?',lvl:'Computer level',next:'NEXT ➜',back:'⬅ Back',nm:'Player names',tap:'Tap the avatar to change it',rd:'Ready?',start:'▶ START GAME',pl:'PLAYERS'},
+hi:{cl:'🎲 क्लासिक',tr:'⚡ ट्रिकी',cpu:'कंप्यूटर',fr:'दोस्त',res:'⏪ खेल जारी रखें',home:'होम',how:'मदद',stats:'आँकड़े',set:'सेटिंग्स',hp:'कितने खिलाड़ी?',lvl:'कंप्यूटर का स्तर',next:'आगे ➜',back:'⬅ वापस',nm:'खिलाड़ियों के नाम',tap:'अवतार बदलने के लिए उस पर टैप करें',rd:'तैयार?',start:'▶ खेल शुरू करें',pl:'खिलाड़ी'}};
+const t=k=>T[SET.lang=='hi'?'hi':'en'][k];
+const HOW={en:`🎲 Roll the dice. A <b>6</b> lets a token leave home and gives an extra turn.<br>🏁 Bring all 4 tokens around the board to the centre. You need the exact number to finish.<br>💥 Landing on an opponent's token sends it home and gives you an extra turn. ⭐ cells are safe.<br>🧱 Two of your tokens on one cell make a <b>blockade</b>: opponents cannot pass it.<br>🚫 Three 6s in a row = turn lost.<br>🥇 Game continues until all but one player have finished.<hr><b>⚡ Tricky mode</b><br>🎲 tile: +1 special dice (choose any number 1-6 instead of rolling)<br>🚧 tile: +1 roadblock. Place it anywhere on the path; opponents cannot pass it until your next turn.<br>🛡️ tile: shield, your token survives one capture.<br>⚡ boost: +4 steps. 🕳️ trap: back 3 steps.<br>Collected tiles jump to a new place. Dice and roadblocks reset every game.`,hi:`🎲 पासा फेंको। <b>6</b> आने पर गोटी घर से निकलती है और दोबारा चाल मिलती है।<br>🏁 चारों गोटियों को पूरा बोर्ड घुमाकर बीच में पहुँचाओ। आखिरी कदम सही अंक से ही पूरा होता है।<br>💥 दूसरे की गोटी पर पहुँचने से वह घर लौट जाती है और तुम्हें एक और चाल मिलती है। ⭐ वाले खाने सुरक्षित हैं।<br>🧱 अपनी दो गोटियाँ एक खाने में हों तो <b>ब्लॉकेड</b> बनता है, दूसरे पार नहीं जा सकते।<br>🚫 लगातार तीन बार 6 आए तो चाल चली जाती है।<br>🥇 खेल तब तक चलता है जब तक एक खिलाड़ी को छोड़कर सब पूरे न कर लें।<hr><b>⚡ ट्रिकी मोड</b><br>🎲 खाना: +1 स्पेशल पासा (फेंकने की जगह 1 से 6 कोई भी अंक चुनो)<br>🚧 खाना: +1 रोडब्लॉक। रास्ते में कहीं भी लगाओ; तुम्हारी अगली चाल तक दूसरे इसे पार नहीं कर सकते।<br>🛡️ खाना: शील्ड, गोटी एक बार कटने से बचती है।<br>⚡ बूस्ट: +4 कदम। 🕳️ ट्रैप: 3 कदम पीछे।<br>उठाने के बाद खाना किसी नई जगह चला जाता है। पासे और रोडब्लॉक हर खेल में नए सिरे से शुरू होते हैं।`};
+function mr(){$('#tav').textContent=AV[0];$('#tnm').textContent=NM[0];$('#tmode').textContent=cfg.mode=='t'?t('tr'):t('cl');const m=$('#stage'),cpu=cfg.vs=='cpu',h0='<div class=card style="text-align:left;font-size:15px;line-height:1.55">',
+nav=`<div class=nav><button data-go=home>🏠<br>${t('home')}</button><button data-go=how>❓<br>${t('how')}</button><button data-go=inv>📊<br>${t('stats')}</button><button data-go=set>⚙️<br>${t('set')}</button></div>`;let h='';
+if(step=='home')h=`<div class=seg><button data-m=c class="${cfg.mode=='c'?'on':''}">${t('cl')}</button><button data-m=t class="${cfg.mode=='t'?'on':''}">${t('tr')}</button></div>
+<div class=grid><button class=tile data-go=cpu><span class=e>🤖</span><span class=l>${t('cpu')}</span></button><button class=tile data-go=fr><span class=e>👥</span><span class=l>${t('fr')}</span></button></div>
+${localStorage.lk_save?`<button class="gold big" data-go=resume>${t('res')}</button>`:''}`+nav;
+else if(step=='count')h=`<h2>${t('hp')}</h2><div class="grid g3">${[2,3,4].map(n=>`<button class="tile${cfg.n==n?' sel':''}" data-n=${n}><span class=e>${'👤'.repeat(n)}</span><span class=l>${n} ${t('pl')}</span></button>`).join('')}</div>
+${cpu?`<b>${t('lvl')}</b><div class=row style="justify-content:center">${['easy','medium','hard'].map(d=>`<button data-d=${d} class="${cfg.d==d?'on':''}">${d.toUpperCase()}</button>`).join('')}</div>`:''}
+<button class="gold big" data-go=names>${t('next')}</button><button class="back big" data-go=home>${t('back')}</button>`;
+else if(step=='names')h=`<h2>${t('nm')}</h2>`+ACT().map(c=>seat(c)=='H'?`<div class=row style="justify-content:center;align-items:center"><button data-a=${c} style="border-color:${COL[c]}">${AV[c]}</button><input data-p=${c} value="${esc(NM[c])}" maxlength=10></div>`:`<div class=row style="justify-content:center;align-items:center"><button disabled style="border-color:${COL[c]}">${AV[c]}</button><input disabled value="Computer (${cfg.d})"></div>`).join('')+`<p style="opacity:.7;font-size:13px">${t('tap')}</p><button class="gold big" data-go=ready>${t('next')}</button><button class="back big" data-go=count>${t('back')}</button>`;
+else if(step=='ready')h=`<h2>${t('rd')}</h2><div class=card>${cfg.mode=='t'?t('tr'):t('cl')} · ${cpu?t('cpu'):t('fr')}<hr>`+ACT().map(c=>`<span style="color:${COL[c]}">●</span> ${AV[c]} ${seat(c)=='H'?esc(NM[c]):'Computer ('+cfg.d+')'}`).join('<br>')+`</div><button id=go class="gold big">${t('start')}</button><button class="back big" data-go=names>${t('back')}</button>`;
+else if(step=='how')h=`<h2>❓ ${t('how')}</h2>${h0}${HOW[SET.lang=='hi'?'hi':'en']}</div>`+nav;
+else if(step=='set')h=`<h2>⚙️ ${t('set')}</h2><div class=card>`+[['sfx','🔊 Sound'],['music','🎵 Music'],['vib','📳 Vibration']].map(([k,l])=>`<button data-s=${k} class="${SET[k]?'on':''}">${l}: ${SET[k]?'ON':'OFF'}</button>`).join('')+`<hr><b>Language / भाषा</b><div class=row style="justify-content:center"><button data-l=en class="${SET.lang!='hi'?'on':''}">English</button><button data-l=hi class="${SET.lang=='hi'?'on':''}">हिन्दी</button></div><hr>${DP?'<button class="gold big" data-go=install>📲 Install app</button>':'<small>Install: Chrome ⋮ → Add to Home screen</small>'}<br><button data-go=reset>🗑️ Reset stats</button></div>`+nav;
+else h=`<h2>📊 ${t('stats')}</h2>${h0}<b>Games finished:</b> ${ST.p} (Classic ${ST.m.c} · Tricky ${ST.m.t})<br><b>Captures:</b> ${ST.cap}<hr><b>🏆 Wins</b><br>`+(Object.entries(ST.w).sort((a,b)=>b[1]-a[1]).slice(0,6).map(([n,v])=>`${esc(n)}: ${v}`).join('<br>')||'—')+`<hr><b>History</b><br>`+(ST.h.slice(-8).reverse().map(esc).join('<br>')||'—')+`</div>`+nav;
+m.innerHTML=h}
 $('#menu').onclick=e=>{const b=e.target.closest('button');if(!b)return;const d=b.dataset;if(d.m)cfg.mode=d.m;if(d.n)cfg.n=+d.n;if(d.d)cfg.d=d.d;
 if(d.a!=null){AV[d.a]=AVL[(AVL.indexOf(AV[d.a])+1)%AVL.length];savePR()}
-if(d.go=='cpu'||d.go=='fr'){cfg.vs=d.go;step='count'}else if(d.go=='resume'){G=ld('lk_save',null);if(G)return begin()}else if(d.go)step=d.go;
+if(d.s){SET[d.s]=SET[d.s]?0:1;sv();if(d.s=='sfx')sfx=!!SET.sfx}
+if(d.l){SET.lang=d.l;sv()}
+if(d.go=='cpu'||d.go=='fr'){cfg.vs=d.go;step='count'}else if(d.go=='resume'){G=ld('lk_save',null);if(G)return begin()}
+else if(d.go=='install'){if(DP){DP.prompt();DP=null}}
+else if(d.go=='reset'){if(confirm('Reset all stats?')){ST={p:0,cap:0,dice:0,h:[],w:{},m:{c:0,t:0}};store()}}
+else if(d.go)step=d.go;
 if(b.id=='go')return startGame();mr()};
 $('#menu').oninput=e=>{const c=e.target.dataset.p;if(c!=null){NM[c]=e.target.value.trim()||DEF[c];savePR()}};
 $('#wagain').onclick=()=>startGame();$('#whome').onclick=()=>{$('#win').hidden=true;show(false)};
 function startGame(){G={mode:cfg.mode,turn:0,bk:[],pk:cfg.mode=='t'?mkPk():[],pl:ACT().map(c=>{const h=seat(c)=='H';return{c,ai:h?0:cfg.d,t:[-1,-1,-1,-1],sh:[0,0,0,0],inv:0,bl:0}})};begin()}
 function show(g){$('#menu').hidden=g;$('#game').hidden=!g;if(g)resize();else{step='home';mr()}}
-function begin(){$('#win').hidden=true;show(true);music=true;turn()}
+function begin(){$('#win').hidden=true;show(true);music=!!SET.music;$('#sfxb').textContent=sfx?'🔊':'🔇';$('#mub').style.opacity=music?1:.4;turn()}
 $('#mn').onclick=()=>{busy=true;show(false)};
-$('#sfxb').onclick=e=>{sfx=!sfx;e.target.textContent=sfx?'🔊':'🔇'};$('#mub').onclick=e=>{music=!music;e.target.style.opacity=music?1:.4};
+$('#sfxb').onclick=e=>{sfx=!sfx;SET.sfx=+sfx;sv();e.target.textContent=sfx?'🔊':'🔇'};$('#mub').onclick=e=>{music=!music;SET.music=+music;sv();e.target.style.opacity=music?1:.4};
 const lv=p=>({easy:1,medium:2,hard:3})[p.ai],cur=()=>G.pl[G.turn],msg=t=>$('#msg').textContent=t;
 const blk=(p,f,to)=>{for(let k=f<0?0:f+1;k<=Math.min(to,50);k++){const a=abs(p,k);if((G.bk||[]).some(b=>b.a==a&&b.o!=p.c))return true;if(!SAFE.has(a)&&G.pl.some(o=>o!==p&&o.t.filter(q=>q>=0&&q<=50&&abs(o,q)==a).length>1))return true}return false};
 const legal=(p,r)=>[0,1,2,3].filter(i=>p.t[i]<0?r==6&&!blk(p,-1,0):p.t[i]+r<=56&&!blk(p,p.t[i],p.t[i]+r));
@@ -51,28 +67,33 @@ if(l>2&&t>=0&&t<=50&&!SAFE.has(abs(p,t)))s+=danger(p,abs(p,t))*22}else s+=20;ret
 function pick(p,r,m){if(lv(p)==1)return m[rnd(m.length)];return m.reduce((b,i)=>score(p,i,r)>score(p,b,r)?i:b,m[0])}
 async function turn(){if(G.over)return;G.bk=G.bk||[];G.pk=G.pk||[];const p=cur();G.ph='roll';localStorage.lk_save=JSON.stringify(G);busy=false;ui();msg(`${AV[p.c]} ${NM[p.c]}'s turn`);
 if(p.ai){busy=true;ui();await sleep(800);if(G.mode=='t'&&lv(p)>1&&(p.bl||0)>0)aiBlock(p);if(lv(p)>1&&p.inv>0){let b=[0,0];for(let n=1;n<7;n++)for(const i of legal(p,n)){const s=score(p,i,n);if(s>b[0])b=[s,n]}if(b[0]>=(lv(p)>2?80:100)){use(p);return roll(b[1])}}roll()}}
-function ui(){const p=cur();$('#bar').innerHTML=G.pl.map((q,i)=>`<div class="pc${i==G.turn?' on':''}" style="border-color:${COL[q.c]}">${AV[q.c]}<small>${NM[q.c]}${q.ai?' 🤖':''}</small>🏠${q.t.filter(x=>x==56).length}${G.mode=='t'?' 🎲'+q.inv+' 🚧'+(q.bl||0):''}</div>`).join('');
+function ui(){const p=cur();$('#bar').innerHTML=G.pl.map((q,i)=>`<div class="pc${i==G.turn?' on':''}" style="border-color:${COL[q.c]}">${AV[q.c]}<small>${esc(NM[q.c])}${q.rk?' #'+q.rk:''}${q.ai?' 🤖':''}</small>🏠${q.t.filter(x=>x==56).length}${G.mode=='t'?' 🎲'+q.inv+' 🚧'+(q.bl||0):''}</div>`).join('');
 $('#sp').hidden=!(!p.ai&&p.inv>0&&G.ph=='roll'&&!busy);$('#sp').textContent=`🎲 Use special dice ×${p.inv}`;$('#bl').hidden=!(G.mode=='t'&&!p.ai&&(p.bl||0)>0&&(G.ph=='roll'||G.ph=='place')&&!busy);$('#bl').textContent=G.ph=='place'?'✖ Cancel':`🚧 Place roadblock ×${p.bl}`;$('#pk').hidden=true}
 $('#bl').onclick=()=>{if(busy)return;if(G.ph=='roll'){G.ph='place';msg('🚧 Tap a cell on the path to place the roadblock');ui()}else if(G.ph=='place'){G.ph='roll';msg('Your turn');ui()}};
 $('#dice').onclick=()=>{if(!busy&&!cur().ai&&G.ph=='roll')roll()};
 $('#sp').onclick=()=>{$('#pk').hidden=!$('#pk').hidden};
 $('#pk').innerHTML=[1,2,3,4,5,6].map(n=>`<button data-n="${n}">${n}</button>`).join('');
 $('#pk').onclick=e=>{const n=+e.target.dataset.n;if(n&&!busy&&G.ph=='roll'&&cur().inv>0){use(cur());roll(n)}};
-async function roll(f){busy=true;const p=cur();ui();$('#dice').classList.add('rl');for(let k=0;k<8;k++){$('#dice').textContent=FACE[rnd(6)];beep(200+k*40,.05);await sleep(70)}$('#dice').classList.remove('rl');
+async function roll(f){busy=true;const p=cur();ui();$('#dice').classList.add('rl');for(let k=0;k<8;k++){$('#dice').textContent=FACE[rnd(6)];beep(200+k*40,.05);await sleep(70)}$('#dice').classList.remove('rl');vib(25);
 const r=f||rnd(6)+1;G.roll=r;if(r==6){G.six=(G.six||0)+1;if(G.six>=3){G.six=0;$('#dice').textContent=FACE[5];msg('🚫 Three 6s in a row! Turn lost');await sleep(1200);return nxt()}}else G.six=0;$('#dice').textContent=FACE[r-1];const m=legal(p,r);
 if(!m.length){msg(`Rolled ${r} - no move${(G.bk||[]).some(b=>b.o!=p.c)?' (🚧 roadblock)':''}`);await sleep(800);return nxt()}
 if(p.ai||m.length==1){await sleep(300);return move(p,p.ai?pick(p,r,m):m[0],r)}
 G.ph='pick';busy=false;msg(`Rolled ${r} - tap a glowing token`)}
-function nxt(){G.six=0;G.turn=(G.turn+1)%G.pl.length;G.bk=(G.bk||[]).filter(b=>b.o!=G.pl[G.turn].c);turn()}
+function endGame(){G.over=true;delete localStorage.lk_save;const w=G.pl.find(q=>q.rk==1),M=['🥇','🥈','🥉','4️⃣'];ST.p++;ST.m[G.mode=='t'?'t':'c']++;ST.w[NM[w.c]]=(ST.w[NM[w.c]]||0)+1;
+ST.h.push(`${new Date().toLocaleDateString()} · ${G.mode=='t'?'Tricky':'Classic'} · ${AV[w.c]} ${NM[w.c]} won`);ST.h=ST.h.slice(-30);store();
+msg(`🏆 ${NM[w.c]} wins!`);$('#wn').textContent=`${AV[w.c]} ${NM[w.c]} wins!`;$('#ws').innerHTML=[...G.pl].sort((x,y)=>x.rk-y.rk).map(q=>`${M[q.rk-1]} ${AV[q.c]} ${esc(q.ai?'Computer':NM[q.c])}`).join('<br>');$('#win').hidden=false;vib(300);[523,659,784,1047].forEach((f,k)=>setTimeout(()=>beep(f,.3),k*200))}
+function nxt(){G.six=0;do{G.turn=(G.turn+1)%G.pl.length}while(G.pl[G.turn].rk);G.bk=(G.bk||[]).filter(b=>b.o!=G.pl[G.turn].c);turn()}
 async function move(p,i,r){busy=true;G.ph='x';const t=p.t,from=t[i],to=from<0?0:from+r;let ex=r==6,cap=0;
 if(from<0){t[i]=0;beep(500)}else for(let k=from+1;k<=to;k++){t[i]=k;beep(300+k*5,.05);await sleep(130)}
 if(to<=50){const a=abs(p,to);
 if(!SAFE.has(a))for(const o of G.pl)if(o!==p)o.t.forEach((q,j)=>{if(q>=0&&q<=50&&abs(o,q)==a){if(o.sh&&o.sh[j]){o.sh[j]=0;msg('🛡️ Shield saved a token!')}else{FX.push([...xy(o,j),Date.now(),COL[o.c]]);o.t[j]=-1;cap++}}});
 if(G.mode=='t'){const k=(G.pk||[]).find(x=>x.a==a);if(k){await sleep(250);beep(800,.25,'square');if(k.t=='d'){gain(p,1);msg('🎲 Special dice collected!');relocate(k)}else if(k.t=='b'){p.bl=(p.bl||0)+1;msg('🚧 Roadblock collected!');relocate(k)}else if(k.t=='s'){(p.sh=p.sh||[0,0,0,0])[i]=1;msg('🛡️ Shield! Safe from the next capture');relocate(k)}else if(k.t=='x'){if(to+4<=50){t[i]=to+4;msg('⚡ Boost! +4 steps')}}else if(k.t=='y'&&to>=3){t[i]=to-3;msg('🕳️ Trap! Back 3 steps')}}}}
-if(cap){ex=true;ST.cap+=cap;gain(p,cap);beep(120,.4,'sawtooth');msg(`💥 Captured ${cap}!${G.mode=='t'?' +'+cap+' special dice':''}`)}
+if(cap){vib(90);ex=true;ST.cap+=cap;gain(p,cap);beep(120,.4,'sawtooth');msg(`💥 Captured ${cap}!${G.mode=='t'?' +'+cap+' special dice':''}`)}
 if(to==56){ex=true;gain(p,1);beep(900,.3);msg(G.mode=='t'?'🏠 Token home! +1 special dice':'🏠 Token home!')}
 ui();await sleep(600);
-if(t.every(q=>q==56)){G.over=true;delete localStorage.lk_save;ST.p++;ST.h.push(`${new Date().toLocaleDateString()} · ${G.mode=='t'?'Tricky':'Classic'} · ${AV[p.c]} ${NM[p.c]} won`);store();msg(`🏆 ${NM[p.c]} wins!`);$('#wn').textContent=`${AV[p.c]} ${NM[p.c]} wins!`;$('#ws').textContent=`Games finished: ${ST.p}`;$('#win').hidden=false;[523,659,784,1047].forEach((f,k)=>setTimeout(()=>beep(f,.3),k*200));return}
+if(t.every(q=>q==56)){G.rk=G.rk||[];p.rk=G.rk.length+1;G.rk.push(p.c);vib(150);[523,659,784].forEach((f,k)=>setTimeout(()=>beep(f,.25),k*150));
+if(G.rk.length>=G.pl.length-1){const l=G.pl.find(q=>!q.rk);if(l){l.rk=G.pl.length;G.rk.push(l.c)}endGame();return}
+msg(`🎉 ${NM[p.c]} finished #${p.rk}!`);await sleep(1000);return nxt()}
 ex?turn():nxt()}
 function xy(p,i){const q=p.t[i];if(q<0){const[a,b]=YS[i],[ox,oy]=YO[p.c];return[ox+a,oy+b]}
 if(q<=50){const c=P[abs(p,q)];return[c[0]+.5+(i-1.5)*.06,c[1]+.5+(i-1.5)*.06]}

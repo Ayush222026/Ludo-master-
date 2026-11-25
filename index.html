@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#1b1340"><title>Rang Chaal - Offline Ludo</title>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#1b1340"><link rel="manifest" href="manifest.json"><link rel="icon" href="icon-192.png"><link rel="apple-touch-icon" href="icon-192.png"><meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-capable" content="yes"><title>Rang Chaal - Offline Ludo</title>
 <style>
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 body{margin:0;background:#1b1340;color:#fff;font-family:system-ui,sans-serif;display:flex;justify-content:center;min-height:100vh}
@@ -50,6 +50,7 @@ canvas{box-shadow:0 0 0 5px #f5b81c,0 10px 26px #000a}
 @keyframes shake{0%,100%{transform:rotate(-12deg)}50%{transform:rotate(12deg) scale(1.12)}}#dice.rl{animation:shake .25s infinite}
 #win{position:fixed;inset:0;background:#000b;display:flex;align-items:center;justify-content:center;z-index:9;overflow:hidden}
 #win .card{max-width:340px;text-align:center;border:3px solid #f5b81c;background:#1a2f8a}.trophy{font-size:80px;animation:sp 2s ease-in-out infinite}
+.nav button{font-size:12px;padding:8px 2px}
 </style></head><body><div id=app>
 <div id=menu><div class=top><div class=av id=tav>🦁</div><b id=tnm>Red</b><span style="flex:1"></span><span class=pill id=tmode>🎲 Classic</span></div>
 <div class=lg><div class=crown>👑</div><div><span class=lt style="color:#e53935;border-color:#e53935">R</span><span class=lt style="color:#43a047;border-color:#43a047">A</span><span class=lt style="color:#fbc02d;border-color:#fbc02d">N</span><span class=lt style="color:#1e88e5;border-color:#1e88e5">G</span></div><div class=sub>CHAAL</div></div>
@@ -60,5 +61,5 @@ canvas{box-shadow:0 0 0 5px #f5b81c,0 10px 26px #000a}
 <button id=dice>⚀</button><div><button id=sp class=s hidden></button><button id=bl class=s hidden></button></div><div id=pk hidden></div>
 <div><button id=mn>☰ Menu</button><button id=sfxb>🔊</button><button id=mub>🎵</button></div></div></div>
 <script>onerror=function(m,u,l){var d=document.getElementById('stage');if(d)d.innerHTML='<div style="padding:12px;background:#5a0000;border-radius:12px;font-size:14px;text-align:left;word-break:break-all">⚠️ Error: '+m+' (line '+l+')<br>Send me a screenshot of this.</div>'}</script>
-<script src="game.js?v=7" onerror="document.getElementById('stage').innerHTML='<div style=&quot;padding:14px;background:#5a0000;border-radius:12px&quot;>⚠️ game.js file nahi mili. GitHub par game.js bhi upload karo.</div>'"></script>
+<script src="game.js?v=8" onerror="document.getElementById('stage').innerHTML='<div style=&quot;padding:14px;background:#5a0000;border-radius:12px&quot;>⚠️ game.js file nahi mili. GitHub par game.js bhi upload karo.</div>'"></script>
 <script>setTimeout(function(){if(!window.__ok){var d=document.getElementById('stage');if(d&&d.innerHTML.indexOf('Loading')>=0)d.innerHTML='<div style="padding:14px;background:#5a0000;border-radius:12px">⚠️ game.js adhura ya purana hai. Naya game.js dobara upload karo.</div>'}},2500)</script></body></html>

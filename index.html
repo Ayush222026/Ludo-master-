@@ -53,7 +53,7 @@ canvas{box-shadow:0 0 0 5px #f5b81c,0 10px 26px #000a}
 </style></head><body><div id=app>
 <div id=menu><div class=top><div class=av id=tav>🦁</div><b id=tnm>Red</b><span style="flex:1"></span><span class=pill id=tmode>🎲 Classic</span></div>
 <div class=lg><div class=crown>👑</div><div><span class=lt style="color:#e53935;border-color:#e53935">R</span><span class=lt style="color:#43a047;border-color:#43a047">A</span><span class=lt style="color:#fbc02d;border-color:#fbc02d">N</span><span class=lt style="color:#1e88e5;border-color:#1e88e5">G</span></div><div class=sub>CHAAL</div></div>
-<div id=stage></div></div>
+<div id=stage><div style="padding:20px">⏳ Loading... (agar yeh dikhta rahe to game code chala nahi)</div></div></div>
 <div id=win hidden><span class=fl style="left:10%">🎉</span><span class=fl style="left:35%;animation-delay:-4s">⭐</span><span class=fl style="left:60%;animation-delay:-2s">🎊</span><span class=fl style="left:85%;animation-delay:-6s">⭐</span>
 <div class=card><div class=trophy>🏆</div><h2 id=wn></h2><p id=ws></p><button id=wagain class="gold big">🔁 Play again</button><button id=whome class="back big">🏠 Menu</button></div></div>
 <div id=game hidden><div id=bar></div><canvas id=cv></canvas><div id=msg></div>
@@ -65,14 +65,14 @@ const $=s=>document.querySelector(s),COL=['#e53935','#43a047','#fdd835','#1e88e5
 const P="1,6 2,6 3,6 4,6 5,6 6,5 6,4 6,3 6,2 6,1 6,0 7,0 8,0 8,1 8,2 8,3 8,4 8,5 9,6 10,6 11,6 12,6 13,6 14,6 14,7 14,8 13,8 12,8 11,8 10,8 9,8 8,9 8,10 8,11 8,12 8,13 8,14 7,14 6,14 6,13 6,12 6,11 6,10 6,9 5,8 4,8 3,8 2,8 1,8 0,8 0,7 0,6".split(' ').map(s=>s.split(',').map(Number));
 const START=[0,13,26,39],SAFE=new Set([0,8,13,21,26,34,39,47]),TRICK=[3,10,16,23,29,36,42,49],YO=[[0,0],[9,0],[9,9],[0,9]],YS=[[1.7,1.7],[4.3,1.7],[1.7,4.3],[4.3,4.3]];
 const HOME=(c,k)=>[[1+k,7],[7,1+k],[13-k,7],[7,13-k]][c],FIN=[[6.6,7.5],[7.5,6.6],[8.4,7.5],[7.5,8.4]];
-const ld=(k,d)=>{try{return JSON.parse(localStorage[k])||d}catch{return d}};
+const ld=(k,d)=>{try{return JSON.parse(localStorage[k])||d}catch(e){return d}};
 let INV=ld('lk_inv',{}),ST=ld('lk_st',{p:0,cap:0,dice:0,h:[]}),G=null,busy=false,sfx=true,music=false,AC;
 let FX=[],cfg={mode:'c',n:2,vs:'cpu',d:'medium'},step='home';const seat=c=>cfg.vs=='fr'||c==0?'H':cfg.d,DEF=['Red','Green','Yellow','Blue'];
 const AVL=['🦁','🐯','🦊','🐼','🐸','🐵','🦄','🐲','🐧','🦉'];let PR=ld('lk_pr',{});for(const c in PR){NM[c]=PR[c].n;AV[c]=PR[c].a}
 const savePR=()=>{PR={};for(let c=0;c<4;c++)PR[c]={n:NM[c],a:AV[c]};localStorage.lk_pr=JSON.stringify(PR)};
 const store=()=>{localStorage.lk_inv=JSON.stringify(INV);localStorage.lk_st=JSON.stringify(ST)};
 const sleep=ms=>new Promise(r=>setTimeout(r,ms)),rnd=n=>Math.floor(Math.random()*n),ACT=()=>cfg.n==2?[0,2]:cfg.n==3?[0,1,2]:[0,1,2,3];
-function beep(f,d=.1,t='sine',v=.08,force){if(!sfx&&!force)return;try{AC=AC||new(window.AudioContext||webkitAudioContext)();const o=AC.createOscillator(),g=AC.createGain();o.type=t;o.frequency.value=f;g.gain.value=v;o.connect(g);g.connect(AC.destination);o.start();g.gain.exponentialRampToValueAtTime(.001,AC.currentTime+d);o.stop(AC.currentTime+d)}catch{}}
+function beep(f,d=.1,t='sine',v=.08,force){if(!sfx&&!force)return;try{AC=AC||new(window.AudioContext||webkitAudioContext)();const o=AC.createOscillator(),g=AC.createGain();o.type=t;o.frequency.value=f;g.gain.value=v;o.connect(g);g.connect(AC.destination);o.start();g.gain.exponentialRampToValueAtTime(.001,AC.currentTime+d);o.stop(AC.currentTime+d)}catch(e){}}
 const NOTES=[262,330,392,523,392,330,294,370,440,587,440,370];let ni=0;setInterval(()=>{if(music)beep(NOTES[ni++%12],.4,'triangle',.03,1)},450);
 function mr(){$('#tav').textContent=AV[0];$('#tnm').textContent=NM[0];$('#tmode').textContent=cfg.mode=='t'?'⚡ Tricky':'🎲 Classic';const m=$('#stage'),cpu=cfg.vs=='cpu';
 if(step=='home')m.innerHTML=`<div class=seg><button data-m=c class="${cfg.mode=='c'?'on':''}">🎲 Classic</button><button data-m=t class="${cfg.mode=='t'?'on':''}">⚡ Tricky</button></div>
@@ -142,5 +142,4 @@ if(q<=50){const c=P[abs(p,q)];return[c[0]+.5+(i-1.5)*.06,c[1]+.5+(i-1.5)*.06]}
 if(q<=55){const c=HOME(p.c,q-51);return[c[0]+.5,c[1]+.5]}return[FIN[p.c][0]+(i-1.5)*.1,FIN[p.c][1]+(i-1.5)*.1]}
 const cv=$('#cv'),X=cv.getContext('2d');
 function resize(){const w=Math.min(innerWidth-20,480),d=devicePixelRatio||1;cv.style.width=cv.style.height=w+'px';cv.width=cv.height=Math.round(w*d)}
-addEventListener('resize',()=>{if(!$('#game').hidden)resize()});
-cv.onclick=e=>{if(!G||busy)return;const b=cv.getBoundingClientRect(),x=(e.clientX-b.left
+addEventListener('resize',()=>{if(!$('#game').hidden)res
